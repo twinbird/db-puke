@@ -79,7 +79,8 @@ INSERT INTO dummy_schema.dummy_table (
     bit_col, uniqueidentifier_col
 ) VALUES (
     255, -32768, 2147483647, 9223372036854775807, 1234.56, 7890.12, 3.141592, 2.71828,
-    'ABC', 'Hello, World!', 'This is a text column',
+    'ABC', 'Hello, World!', 'This is
+a text column',
     N'あいう', N'こんにちは', N'これはNTextです',
     '2025-02-07', '2025-02-07 12:34:56', '2025-02-07 12:34:56.789', '2025-02-07 12:34:00', '12:34:56', '2025-02-07 12:34:56 +09:00',
     0x0123456789ABCDEF0123456789ABCDEF, 0x0123456789ABCDEF, 0x0123456789ABCDEF0123456789ABCDEF,
