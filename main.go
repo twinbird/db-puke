@@ -36,7 +36,15 @@ func main() {
 	}
 	fmt.Println("SQL Server に接続しました。")
 
-	// クエリ実行
+	tables, err := getTables(db, schema)
+	if err != nil {
+		log.Fatal("getTables Failed", err)
+	}
+
+	fmt.Printf("%v\n", tables)
+}
+
+func getTables(db *sql.DB, schema string) ([]string, error) {
 	query := `
         SELECT
 			TABLE_SCHEMA,
@@ -54,7 +62,7 @@ func main() {
 	}
 	defer rows.Close()
 
-	// 結果の処理
+	var tables []string
 	for rows.Next() {
 		var schema, tname string
 
@@ -62,11 +70,7 @@ func main() {
 		if err != nil {
 			log.Fatal("結果取得エラー:", err)
 		}
-		fmt.Printf("schema: %s, table: %s\n", schema, tname)
+		tables = append(tables, tname)
 	}
-
-	// エラーチェック
-	if err = rows.Err(); err != nil {
-		log.Fatal("rows エラー:", err)
-	}
+	return tables, nil
 }
