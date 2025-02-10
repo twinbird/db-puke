@@ -4,6 +4,8 @@ services:
     container_name: mssql
     ports:
       - 1433:1433
+    expose:
+      - 5432
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=saPassword1234

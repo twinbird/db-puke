@@ -1,7 +1,14 @@
 #!/bin/bash
 
+# create database
+docker compose exec -i mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'saPassword1234' -C -Q "
+DROP DATABASE IF EXISTS dummy_database;
+CREATE DATABASE dummy_database;
+"
+
 # create table
 docker compose exec -i mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'saPassword1234' -C -Q "
+USE dummy_database;
 -- Many column type table
 DROP TABLE IF EXISTS dummy_table;
 CREATE TABLE dummy_table (
@@ -53,27 +60,28 @@ CREATE TABLE dummy_table3 (
 
 # insert dummy data
 docker compose exec -i mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'saPassword1234' -C -Q "
-  INSERT INTO dummy_table (
-      tinyint_col, smallint_col, int_col, bigint_col, decimal_col, numeric_col, float_col, real_col,
-      char_col, varchar_col, text_col, 
-      nchar_col, nvarchar_col, ntext_col, 
-      date_col, datetime_col, datetime2_col, smalldatetime_col, time_col, datetimeoffset_col,
-      binary_col, varbinary_col, image_col, 
-      bit_col, uniqueidentifier_col
-  ) VALUES (
-      255, -32768, 2147483647, 9223372036854775807, 1234.56, 7890.12, 3.141592, 2.71828,
-      'ABC', 'Hello, World!', 'This is a text column',
-      N'あいう', N'こんにちは', N'これはNTextです',
-      '2025-02-07', '2025-02-07 12:34:56', '2025-02-07 12:34:56.789', '2025-02-07 12:34:00', '12:34:56', '2025-02-07 12:34:56 +09:00',
-      0x0123456789ABCDEF0123456789ABCDEF, 0x0123456789ABCDEF, 0x0123456789ABCDEF0123456789ABCDEF,
-      1, NEWID()
-  )
+USE dummy_database;
+INSERT INTO dummy_table (
+    tinyint_col, smallint_col, int_col, bigint_col, decimal_col, numeric_col, float_col, real_col,
+    char_col, varchar_col, text_col, 
+    nchar_col, nvarchar_col, ntext_col, 
+    date_col, datetime_col, datetime2_col, smalldatetime_col, time_col, datetimeoffset_col,
+    binary_col, varbinary_col, image_col, 
+    bit_col, uniqueidentifier_col
+) VALUES (
+    255, -32768, 2147483647, 9223372036854775807, 1234.56, 7890.12, 3.141592, 2.71828,
+    'ABC', 'Hello, World!', 'This is a text column',
+    N'あいう', N'こんにちは', N'これはNTextです',
+    '2025-02-07', '2025-02-07 12:34:56', '2025-02-07 12:34:56.789', '2025-02-07 12:34:00', '12:34:56', '2025-02-07 12:34:56 +09:00',
+    0x0123456789ABCDEF0123456789ABCDEF, 0x0123456789ABCDEF, 0x0123456789ABCDEF0123456789ABCDEF,
+    1, NEWID()
+)
 
-  INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW1');
-  INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW2');
-  INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW3');
+INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW1');
+INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW2');
+INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW3');
 
-  INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW1');
-  INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW2');
-  INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW3');
+INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW1');
+INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW2');
+INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW3');
 "
