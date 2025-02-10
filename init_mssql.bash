@@ -6,12 +6,21 @@ DROP DATABASE IF EXISTS dummy_database;
 CREATE DATABASE dummy_database;
 "
 
+# create schema
+docker compose exec -i mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'saPassword1234' -C -Q "
+USE dummy_database;
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'dummy_schema')
+BEGIN
+    EXEC('CREATE SCHEMA dummy_schema AUTHORIZATION dbo;');
+END;
+"
+
 # create table
 docker compose exec -i mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'saPassword1234' -C -Q "
 USE dummy_database;
 -- Many column type table
-DROP TABLE IF EXISTS dummy_table;
-CREATE TABLE dummy_table (
+DROP TABLE IF EXISTS dummy_schema.dummy_table;
+CREATE TABLE dummy_schema.dummy_table (
     id INT PRIMARY KEY IDENTITY(1,1),
 
     tinyint_col TINYINT,
@@ -47,13 +56,13 @@ CREATE TABLE dummy_table (
 );
 
 -- simple table
-DROP TABLE IF EXISTS dummy_table2;
-CREATE TABLE dummy_table2 (
+DROP TABLE IF EXISTS dummy_schema.dummy_table2;
+CREATE TABLE dummy_schema.dummy_table2 (
     char_col CHAR(10) PRIMARY KEY
 );
 -- simple table
-DROP TABLE IF EXISTS dummy_table3;
-CREATE TABLE dummy_table3 (
+DROP TABLE IF EXISTS dummy_schema.dummy_table3;
+CREATE TABLE dummy_schema.dummy_table3 (
     char_col CHAR(10) PRIMARY KEY
 );
 "
@@ -61,7 +70,7 @@ CREATE TABLE dummy_table3 (
 # insert dummy data
 docker compose exec -i mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P 'saPassword1234' -C -Q "
 USE dummy_database;
-INSERT INTO dummy_table (
+INSERT INTO dummy_schema.dummy_table (
     tinyint_col, smallint_col, int_col, bigint_col, decimal_col, numeric_col, float_col, real_col,
     char_col, varchar_col, text_col, 
     nchar_col, nvarchar_col, ntext_col, 
@@ -77,11 +86,11 @@ INSERT INTO dummy_table (
     1, NEWID()
 )
 
-INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW1');
-INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW2');
-INSERT INTO dummy_table2 ( char_col ) VALUES ('ROW3');
+INSERT INTO dummy_schema.dummy_table2 ( char_col ) VALUES ('ROW1');
+INSERT INTO dummy_schema.dummy_table2 ( char_col ) VALUES ('ROW2');
+INSERT INTO dummy_schema.dummy_table2 ( char_col ) VALUES ('ROW3');
 
-INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW1');
-INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW2');
-INSERT INTO dummy_table3 ( char_col ) VALUES ('ROW3');
+INSERT INTO dummy_schema.dummy_table3 ( char_col ) VALUES ('ROW1');
+INSERT INTO dummy_schema.dummy_table3 ( char_col ) VALUES ('ROW2');
+INSERT INTO dummy_schema.dummy_table3 ( char_col ) VALUES ('ROW3');
 "

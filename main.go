@@ -16,6 +16,7 @@ func main() {
 	user := "SA"
 	password := "saPassword1234"
 	database := "dummy_database"
+	schema := "dummy_schema"
 
 	// 接続文字列の作成
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
@@ -36,8 +37,18 @@ func main() {
 	fmt.Println("SQL Server に接続しました。")
 
 	// クエリ実行
-	query := "SELECT id, varchar_col FROM dummy_table"
-	rows, err := db.QueryContext(context.Background(), query)
+	query := `
+        SELECT
+			TABLE_SCHEMA,
+			TABLE_NAME 
+		FROM
+			INFORMATION_SCHEMA.TABLES 
+		WHERE
+			TABLE_TYPE = 'BASE TABLE'
+		AND
+			TABLE_SCHEMA = @schema
+	`
+	rows, err := db.QueryContext(context.Background(), query, sql.Named("schema", schema))
 	if err != nil {
 		log.Fatal("クエリ実行エラー:", err)
 	}
@@ -45,14 +56,13 @@ func main() {
 
 	// 結果の処理
 	for rows.Next() {
-		var id int
-		var varcharCol string
+		var schema, tname string
 
-		err := rows.Scan(&id, &varcharCol)
+		err := rows.Scan(&schema, &tname)
 		if err != nil {
 			log.Fatal("結果取得エラー:", err)
 		}
-		fmt.Printf("ID: %d, varchar_col: %s\n", id, varcharCol)
+		fmt.Printf("schema: %s, table: %s\n", schema, tname)
 	}
 
 	// エラーチェック
