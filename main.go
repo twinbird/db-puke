@@ -27,30 +27,31 @@ type Config struct {
 func parseArgs() *Config {
 	config := &Config{}
 
-	// フラグの定義
 	flag.StringVar(&config.DBType, "type", "mssql", "database type (mssql)")
 	flag.StringVar(&config.Host, "h", "localhost", "hostname")
 	flag.IntVar(&config.Port, "p", 1433, "port")
 	flag.StringVar(&config.Database, "d", "", "database")
-	flag.StringVar(&config.Schema, "s", "dbo", "schema")
+	flag.StringVar(&config.Schema, "s", "", "schema")
 	flag.StringVar(&config.User, "u", "", "username")
 	flag.StringVar(&config.Password, "P", "", "password")
-	flag.StringVar(&config.OutDir, "o", "./", "export dir")
+	flag.StringVar(&config.OutDir, "o", "db-puke-exported", "export dir")
 
-	// パース
 	flag.Parse()
 
-	// 必須項目チェック
 	if config.Database == "" {
-		fmt.Println("エラー: データベース名 (-d) を指定してください")
+		fmt.Println("Error: Please specify the database name (-d)")
+		os.Exit(1)
+	}
+	if config.Schema == "" {
+		fmt.Println("Error: Please specify the schema name (-s)")
 		os.Exit(1)
 	}
 	if config.User == "" {
-		fmt.Println("エラー: ユーザー名 (-u) を指定してください")
+		fmt.Println("Error: Please specify the username (-u)")
 		os.Exit(1)
 	}
 	if config.Password == "" {
-		fmt.Println("エラー: パスワード (-P) を指定してください")
+		fmt.Println("Error: Please specify the database password (-P)")
 		os.Exit(1)
 	}
 
@@ -58,38 +59,34 @@ func parseArgs() *Config {
 }
 
 func main() {
-	// オプション解析
 	config := parseArgs()
 
-	// 接続文字列の作成
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
 		config.User, config.Password, config.Host, config.Port, config.Database)
 
-	// データベース接続
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
-		log.Fatal("接続エラー:", err)
+		log.Fatal("Error: Failed to connect to the database", err)
 	}
 	defer db.Close()
 
-	// 接続確認
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("Ping 失敗:", err)
+		log.Fatal("Error: Failed to connect to the database", err)
 	}
-	fmt.Println("SQL Server に接続しました。")
 
 	tables, err := getTables(db, config.Schema)
 	if err != nil {
-		log.Fatal("getTables Failed", err)
+		log.Fatal("Failed to retrieve the list of tables", err)
 	}
+	log.Println(tables)
 
 	for _, table := range tables {
 		err := exportTableToCSV(db, config.Schema, table, config.OutDir)
 		if err != nil {
-			log.Printf("テーブル %s のエクスポートに失敗: %v\n", table, err)
+			log.Printf("Failed %s %v\n", table, err)
 		} else {
-			fmt.Printf("テーブル %s をエクスポートしました\n", table)
+			fmt.Printf("Success %s\n", table)
 		}
 	}
 }
@@ -108,7 +105,7 @@ func getTables(db *sql.DB, schema string) ([]string, error) {
 	`
 	rows, err := db.QueryContext(context.Background(), query, sql.Named("schema", schema))
 	if err != nil {
-		log.Fatal("クエリ実行エラー:", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -118,7 +115,7 @@ func getTables(db *sql.DB, schema string) ([]string, error) {
 
 		err := rows.Scan(&schema, &tname)
 		if err != nil {
-			log.Fatal("結果取得エラー:", err)
+			return nil, err
 		}
 		tables = append(tables, tname)
 	}
@@ -126,28 +123,23 @@ func getTables(db *sql.DB, schema string) ([]string, error) {
 }
 
 func getOutputFilePath(outdir, tableName string) (string, error) {
-	// 出力ディレクトリを絶対パスに変換
 	absPath, err := filepath.Abs(outdir)
 	if err != nil {
-		return "", fmt.Errorf("出力ディレクトリのパス取得エラー: %w", err)
+		return "", fmt.Errorf("Error retrieving output directory path: %w", err)
 	}
 
-	// ディレクトリが存在しない場合は作成
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(absPath, 0755); err != nil {
-			return "", fmt.Errorf("出力ディレクトリの作成エラー: %w", err)
+			return "", fmt.Errorf("Error creating output directory: %w", err)
 		}
 	}
 
-	// ファイルのフルパスを組み立て
 	filePath := filepath.Join(absPath, fmt.Sprintf("%s.csv", tableName))
 
 	return filePath, nil
 }
 
-// テーブルの内容をCSVファイルに書き出す
 func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
-	// クエリを作成
 	query := fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table)
 	rows, err := db.Query(query)
 	if err != nil {
@@ -155,13 +147,11 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 	}
 	defer rows.Close()
 
-	// カラム情報を取得
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
 	}
 
-	// CSVファイルを作成
 	fileName, err := getOutputFilePath(outdir, table)
 	if err != nil {
 		return err
@@ -175,12 +165,10 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	// カラム名を書き込む
 	if err := writer.Write(columns); err != nil {
 		return err
 	}
 
-	// 各行のデータを書き込む
 	values := make([]interface{}, len(columns))
 	valuePtrs := make([]interface{}, len(columns))
 
