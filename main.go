@@ -79,7 +79,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to retrieve the list of tables", err)
 	}
-	log.Println(tables)
 
 	for _, table := range tables {
 		err := exportTableToCSV(db, config.Schema, table, config.OutDir)
