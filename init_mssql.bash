@@ -60,10 +60,10 @@ DROP TABLE IF EXISTS dummy_schema.dummy_table2;
 CREATE TABLE dummy_schema.dummy_table2 (
     char_col CHAR(10) PRIMARY KEY
 );
--- simple table
-DROP TABLE IF EXISTS dummy_schema.dummy_table3;
-CREATE TABLE dummy_schema.dummy_table3 (
-    char_col CHAR(10) PRIMARY KEY
+-- multibyte lang table
+DROP TABLE IF EXISTS dummy_schema.日本語のテーブル;
+CREATE TABLE dummy_schema.日本語のテーブル (
+    日本語の列 CHAR(50) PRIMARY KEY
 );
 "
 
@@ -91,7 +91,7 @@ INSERT INTO dummy_schema.dummy_table2 ( char_col ) VALUES ('ROW1');
 INSERT INTO dummy_schema.dummy_table2 ( char_col ) VALUES ('ROW2');
 INSERT INTO dummy_schema.dummy_table2 ( char_col ) VALUES ('ROW3');
 
-INSERT INTO dummy_schema.dummy_table3 ( char_col ) VALUES ('ROW1');
-INSERT INTO dummy_schema.dummy_table3 ( char_col ) VALUES ('ROW2');
-INSERT INTO dummy_schema.dummy_table3 ( char_col ) VALUES ('ROW3');
+INSERT INTO dummy_schema.日本語のテーブル ( 日本語の列 ) VALUES ('日本語のデータ1');
+INSERT INTO dummy_schema.日本語のテーブル ( 日本語の列 ) VALUES ('日本語のデータ2');
+INSERT INTO dummy_schema.日本語のテーブル ( 日本語の列 ) VALUES ('日本語のデータ3');
 "
