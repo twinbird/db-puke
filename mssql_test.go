@@ -17,7 +17,7 @@ var option = &Option{
 	Schema:   "dummy_schema",
 	User:     "sa",
 	Password: "saPassword1234",
-	OutDir:   "testoutdir_test_int_column",
+	OutDir:   "testoutdir/test_int_column",
 }
 
 func execSQL(t *testing.T, option *Option, query string) {
@@ -50,6 +50,17 @@ func CompareFiles(file1, file2 string) (bool, error) {
 	return bytes.Equal(data1, data2), nil
 }
 
+func AssertCompareFiles(t *testing.T, file1, file2 string) {
+	ret, err := CompareFiles("testoutdir/test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
+	if err != nil {
+		t.Errorf("file compare failed: %v", err)
+	}
+
+	if ret == false {
+		t.Errorf("output file is not equal")
+	}
+}
+
 func TestIntColumn(t *testing.T) {
 	// Create table for test
 	execSQL(t, option, `
@@ -67,12 +78,5 @@ func TestIntColumn(t *testing.T) {
 
 	exec(option)
 
-	ret, err := CompareFiles("testoutdir_test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
-	if err != nil {
-		t.Errorf("file compare failed: %v", err)
-	}
-
-	if ret == false {
-		t.Errorf("output file is not equal")
-	}
+	AssertCompareFiles(t, "testoutdir_test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
 }
