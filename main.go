@@ -13,7 +13,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-type Config struct {
+type Option struct {
 	DBType   string
 	Host     string
 	Port     int
@@ -24,45 +24,45 @@ type Config struct {
 	OutDir   string
 }
 
-func parseArgs() *Config {
-	config := &Config{}
+func parseArgs() *Option {
+	option := &Option{}
 
-	flag.StringVar(&config.DBType, "type", "mssql", "database type (mssql)")
-	flag.StringVar(&config.Host, "h", "localhost", "hostname")
-	flag.IntVar(&config.Port, "p", 1433, "port")
-	flag.StringVar(&config.Database, "d", "", "database")
-	flag.StringVar(&config.Schema, "s", "", "schema")
-	flag.StringVar(&config.User, "u", "", "username")
-	flag.StringVar(&config.Password, "P", "", "password")
-	flag.StringVar(&config.OutDir, "o", "db-puke-exported", "export dir")
+	flag.StringVar(&option.DBType, "type", "mssql", "database type (mssql)")
+	flag.StringVar(&option.Host, "h", "localhost", "hostname")
+	flag.IntVar(&option.Port, "p", 1433, "port")
+	flag.StringVar(&option.Database, "d", "", "database")
+	flag.StringVar(&option.Schema, "s", "", "schema")
+	flag.StringVar(&option.User, "u", "", "username")
+	flag.StringVar(&option.Password, "P", "", "password")
+	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export dir")
 
 	flag.Parse()
 
-	if config.Database == "" {
+	if option.Database == "" {
 		fmt.Println("Error: Please specify the database name (-d)")
 		os.Exit(1)
 	}
-	if config.Schema == "" {
+	if option.Schema == "" {
 		fmt.Println("Error: Please specify the schema name (-s)")
 		os.Exit(1)
 	}
-	if config.User == "" {
+	if option.User == "" {
 		fmt.Println("Error: Please specify the username (-u)")
 		os.Exit(1)
 	}
-	if config.Password == "" {
+	if option.Password == "" {
 		fmt.Println("Error: Please specify the database password (-P)")
 		os.Exit(1)
 	}
 
-	return config
+	return option
 }
 
 func main() {
-	config := parseArgs()
+	option := parseArgs()
 
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
-		config.User, config.Password, config.Host, config.Port, config.Database)
+		option.User, option.Password, option.Host, option.Port, option.Database)
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
@@ -75,14 +75,14 @@ func main() {
 		log.Fatal("Error: Failed to connect to the database", err)
 	}
 
-	tables, err := getTables(db, config.Schema)
+	tables, err := getTables(db, option.Schema)
 	if err != nil {
 		log.Fatal("Failed to retrieve the list of tables", err)
 	}
 	log.Println(tables)
 
 	for _, table := range tables {
-		err := exportTableToCSV(db, config.Schema, table, config.OutDir)
+		err := exportTableToCSV(db, option.Schema, table, option.OutDir)
 		if err != nil {
 			log.Printf("Failed %s %v\n", table, err)
 		} else {
