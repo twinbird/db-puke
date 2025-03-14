@@ -70,6 +70,12 @@ func parseArgs() *Option {
 func main() {
 	option := parseArgs()
 
+	exec(option)
+
+	os.Exit(0)
+}
+
+func exec(option *Option) {
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
 		option.User, option.Password, option.Host, option.Port, option.Database)
 
@@ -88,14 +94,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to retrieve the list of tables", err)
 	}
-	log.Println(tables)
 
 	for _, table := range tables {
 		err := exportTableToCSV(db, option.Schema, table, option.OutDir)
 		if err != nil {
 			log.Printf("Failed %s %v\n", table, err)
-		} else {
-			fmt.Printf("Success %s\n", table)
 		}
 	}
 }
