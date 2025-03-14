@@ -13,6 +13,10 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
+const (
+	DBTypeMSSql = "mssql"
+)
+
 type Option struct {
 	DBType   string
 	Host     string
@@ -37,6 +41,11 @@ func parseArgs() *Option {
 	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export dir")
 
 	flag.Parse()
+
+	if option.DBType != DBTypeMSSql {
+		fmt.Println("Error: Specify database type is not supported")
+		os.Exit(1)
+	}
 
 	if option.Database == "" {
 		fmt.Println("Error: Please specify the database name (-d)")
