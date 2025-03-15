@@ -52,7 +52,7 @@ func CompareFiles(file1, file2 string) (bool, error) {
 }
 
 func AssertCompareFiles(t *testing.T, file1, file2 string) {
-	ret, err := CompareFiles("testoutdir/test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
+	ret, err := CompareFiles(file1, file2)
 	if err != nil {
 		t.Errorf("file compare failed: %v", err)
 	}
@@ -101,5 +101,5 @@ func TestIntColumn(t *testing.T) {
 
 	exec(msSqlOption)
 
-	AssertCompareFiles(t, "testoutdir_test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
+	AssertCompareFiles(t, "testoutdir/test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
 }
