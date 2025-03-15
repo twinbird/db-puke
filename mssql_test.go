@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/microsoft/go-mssqldb"
+	"log"
 	"os"
 	"testing"
 )
 
-var option = &Option{
+var msSqlOption = &Option{
 	DBType:   DBTypeMSSql,
 	Host:     "127.0.0.1",
 	Port:     1433,
@@ -20,19 +21,19 @@ var option = &Option{
 	OutDir:   "testoutdir/test_int_column",
 }
 
-func execSQL(t *testing.T, option *Option, query string) {
+func execSQL(query string) {
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
-		option.User, option.Password, option.Host, option.Port, option.Database)
+		msSqlOption.User, msSqlOption.Password, msSqlOption.Host, msSqlOption.Port, msSqlOption.Database)
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
-		t.Fatal("Error: Failed to connect to the database", err)
+		log.Fatal("Error: Failed to connect to the database", err)
 	}
 	defer db.Close()
 
 	_, err = db.Exec(query)
 	if err != nil {
-		t.Fatal("Error: Failed to Exec", err)
+		log.Fatal("Error: Failed to Exec", err)
 	}
 }
 
@@ -63,7 +64,7 @@ func AssertCompareFiles(t *testing.T, file1, file2 string) {
 
 func TestIntColumn(t *testing.T) {
 	// Create table for test
-	execSQL(t, option, `
+	execSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_int_column_table;
 		CREATE TABLE dummy_schema.test_int_column_table (
@@ -71,12 +72,12 @@ func TestIntColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(t, option, `
+	execSQL(`
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (1);
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (2);
 	`)
 
-	exec(option)
+	exec(msSqlOption)
 
 	AssertCompareFiles(t, "testoutdir_test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
 }
