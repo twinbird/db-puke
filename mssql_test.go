@@ -23,7 +23,7 @@ var msSqlOption = &Option{
 
 func execSQL(query string) {
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
-		msSqlOption.User, msSqlOption.Password, msSqlOption.Host, msSqlOption.Port, msSqlOption.Database)
+		msSqlOption.User, msSqlOption.Password, msSqlOption.Host, msSqlOption.Port, "")
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
@@ -62,6 +62,27 @@ func AssertCompareFiles(t *testing.T, file1, file2 string) {
 	}
 }
 
+func createDatabaseAndSchema() {
+	execSQL(`
+		DROP DATABASE IF EXISTS dummy_database;
+		CREATE DATABASE dummy_database;
+	`)
+
+	execSQL(`
+		USE dummy_database;
+		IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'dummy_schema')
+		BEGIN
+			EXEC('CREATE SCHEMA dummy_schema AUTHORIZATION dbo;');
+		END;
+	`)
+}
+
+func TestMain(m *testing.M) {
+	createDatabaseAndSchema()
+
+	m.Run()
+}
+
 func TestIntColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
@@ -73,6 +94,7 @@ func TestIntColumn(t *testing.T) {
 	`)
 	// Insert test data
 	execSQL(`
+		USE dummy_database;
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (1);
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (2);
 	`)
