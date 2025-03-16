@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"log"
 	"os"
 	"testing"
 
@@ -30,5 +31,11 @@ func AssertCompareFiles(t *testing.T, file1, file2 string) {
 
 	if ret == false {
 		t.Errorf("output file is not equal")
+	}
+}
+
+func RemoveTestOutputFile(dir string) {
+	if err := os.RemoveAll(dir); err != nil {
+		log.Fatal("directory remove failed.", err)
 	}
 }

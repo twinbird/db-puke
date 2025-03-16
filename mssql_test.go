@@ -52,6 +52,7 @@ func createDatabaseAndSchema() {
 }
 
 func TestMain(m *testing.M) {
+	RemoveTestOutputFile("testoutdir/mssql")
 	createDatabaseAndSchema()
 
 	m.Run()
@@ -69,12 +70,34 @@ func TestIntColumn(t *testing.T) {
 	// Insert test data
 	execSQL(`
 		USE dummy_database;
-		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (1);
-		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (2);
+		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (-2147483648);
+		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (2147483647);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/test_int_column"
+	msSqlOption.OutDir = "testoutdir/mssql"
 	exec(msSqlOption)
 
-	AssertCompareFiles(t, "testoutdir/test_int_column/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
+	AssertCompareFiles(t, "testoutdir/mssql/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
+}
+
+func TestSmallintColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_smallint_column_table;
+		CREATE TABLE dummy_schema.test_smallint_column_table (
+			smallint_col SMALLINT NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (-32768);
+		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (32767);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	exec(msSqlOption)
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_smallint_column_table.csv", "testdata/mssql/test_smallint_column_table.csv")
 }
