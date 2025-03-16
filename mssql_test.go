@@ -101,3 +101,25 @@ func TestSmallintColumn(t *testing.T) {
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_smallint_column_table.csv", "testdata/mssql/test_smallint_column_table.csv")
 }
+
+func TestTinyintColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_tinyint_column_table;
+		CREATE TABLE dummy_schema.test_tinyint_column_table (
+			tinyint_col tinyINT NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_tinyint_column_table (tinyint_col) VALUES (0);
+		INSERT INTO dummy_schema.test_tinyint_column_table (tinyint_col) VALUES (255);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	exec(msSqlOption)
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_tinyint_column_table.csv", "testdata/mssql/test_tinyint_column_table.csv")
+}
