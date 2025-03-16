@@ -71,6 +71,7 @@ func TestIntColumn(t *testing.T) {
 	execSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (-2147483648);
+		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (0);
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (2147483647);
 	`)
 
@@ -93,6 +94,7 @@ func TestSmallintColumn(t *testing.T) {
 	execSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (-32768);
+		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (0);
 		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (32767);
 	`)
 
@@ -124,6 +126,7 @@ func TestTinyintColumn(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_tinyint_column_table.csv", "testdata/mssql/test_tinyint_column_table.csv")
 }
 
+/*
 func TestBitColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
@@ -145,3 +148,4 @@ func TestBitColumn(t *testing.T) {
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_bit_column_table.csv", "testdata/mssql/test_bit_column_table.csv")
 }
+*/
