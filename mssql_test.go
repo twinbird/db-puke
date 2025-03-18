@@ -153,6 +153,33 @@ func TestFloatColumn(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_float_column_table.csv", "testdata/mssql/test_float_column_table.csv")
 }
 
+func TestRealColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_real_column_table;
+		CREATE TABLE dummy_schema.test_real_column_table (
+			real_col REAL NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (-3.40E+38);
+		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (-1.18E-38);
+
+		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (0);
+
+		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (1.18E-38);
+		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (3.40E+38);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	exec(msSqlOption)
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_real_column_table.csv", "testdata/mssql/test_real_column_table.csv")
+}
+
 /*
 func TestBitColumn(t *testing.T) {
 	// Create table for test
