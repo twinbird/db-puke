@@ -9,28 +9,20 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-func CompareFiles(file1, file2 string) (bool, error) {
-	data1, err := os.ReadFile(file1)
+func AssertCompareFiles(t *testing.T, got, want string) {
+	got_data, err := os.ReadFile(got)
 	if err != nil {
-		return false, err
+		t.Fatalf("file compare failed: %v", err)
 	}
 
-	data2, err := os.ReadFile(file2)
+	want_data, err := os.ReadFile(want)
 	if err != nil {
-		return false, err
+		t.Fatalf("file compare failed: %v", err)
 	}
-
-	return bytes.Equal(data1, data2), nil
-}
-
-func AssertCompareFiles(t *testing.T, file1, file2 string) {
-	ret, err := CompareFiles(file1, file2)
-	if err != nil {
-		t.Errorf("file compare failed: %v", err)
-	}
+	ret := bytes.Equal(got_data, want_data)
 
 	if ret == false {
-		t.Errorf("output file is not equal")
+		t.Errorf("output file is not equal. want:%s, got:%s", want_data, got_data)
 	}
 }
 

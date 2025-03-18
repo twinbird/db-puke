@@ -110,7 +110,7 @@ func TestTinyintColumn(t *testing.T) {
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_tinyint_column_table;
 		CREATE TABLE dummy_schema.test_tinyint_column_table (
-			tinyint_col tinyINT NOT NULL PRIMARY KEY
+			tinyint_col TINYINT NOT NULL PRIMARY KEY
 		);
 	`)
 	// Insert test data
@@ -124,6 +124,33 @@ func TestTinyintColumn(t *testing.T) {
 	exec(msSqlOption)
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_tinyint_column_table.csv", "testdata/mssql/test_tinyint_column_table.csv")
+}
+
+func TestFloatColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_float_column_table;
+		CREATE TABLE dummy_schema.test_float_column_table (
+			float_col FLOAT NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (-1.79E+308);
+		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (-2.23E-308);
+
+		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (0);
+
+		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (2.23E-308);
+		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (1.79E+308);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	exec(msSqlOption)
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_float_column_table.csv", "testdata/mssql/test_float_column_table.csv")
 }
 
 /*
