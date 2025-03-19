@@ -180,6 +180,37 @@ func TestRealColumn(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_real_column_table.csv", "testdata/mssql/test_real_column_table.csv")
 }
 
+func TestCharColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_char_column_table;
+		CREATE TABLE dummy_schema.test_char_column_table (
+			char_col CHAR(30) NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('a');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('                             a');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('012345678901234567890123456789');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('nonescapestring:nonescapestrin');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('shouldbeescape
+shouldbeescape');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('shouldbeescape"shouldbeescape"');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('shouldbeescape,shouldbeescape,');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('TEST string');
+		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('日本語の文字列');
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	exec(msSqlOption)
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_char_column_table.csv", "testdata/mssql/test_char_column_table.csv")
+}
+
 /*
 func TestBitColumn(t *testing.T) {
 	// Create table for test

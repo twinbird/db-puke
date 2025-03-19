@@ -22,7 +22,7 @@ func AssertCompareFiles(t *testing.T, got, want string) {
 	ret := bytes.Equal(got_data, want_data)
 
 	if ret == false {
-		t.Errorf("output file is not equal. want:%s, got:%s", want_data, got_data)
+		t.Errorf("output file is not equal.\nwant:\n%s\ngot:\n%s\n", want_data, got_data)
 	}
 }
 
