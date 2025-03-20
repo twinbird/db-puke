@@ -1,0 +1,12 @@
+varchar_col
+
+"                             a"
+012345678901234567890123456789
+a
+nonescapestring:nonescapestrin
+"shouldbeescape
+shouldbeescape"
+"shouldbeescape""shouldbeescape"""
+"shouldbeescape,shouldbeescape,"
+TEST string
+日本語の文字列
