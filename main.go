@@ -134,6 +134,42 @@ func getTables(db *sql.DB, schema string) ([]string, error) {
 	return tables, nil
 }
 
+func getColumnType(db *sql.DB, schema_name, table_name string) (map[string]string, error) {
+	query := `
+		SELECT
+			 COLUMN_NAME
+			,DATA_TYPE
+		FROM
+			INFORMATION_SCHEMA.COLUMNS
+		WHERE
+			TABLE_NAME = @table_name
+		AND
+			TABLE_SCHEMA = @schema_name;
+	`
+	rows, err := db.QueryContext(
+		context.Background(),
+		query,
+		sql.Named("table_name", table_name),
+		sql.Named("schema_name", schema_name),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	columns := make(map[string]string, 0)
+	for rows.Next() {
+		var column_name, data_type string
+
+		err := rows.Scan(&column_name, &data_type)
+		if err != nil {
+			return nil, err
+		}
+		columns[column_name] = data_type
+	}
+	return columns, nil
+}
+
 func getOutputFilePath(outdir, tableName string) (string, error) {
 	absPath, err := filepath.Abs(outdir)
 	if err != nil {
@@ -152,6 +188,11 @@ func getOutputFilePath(outdir, tableName string) (string, error) {
 }
 
 func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
+	column_types, err := getColumnType(db, schema, table)
+	if err != nil {
+		return err
+	}
+
 	query := fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table)
 	rows, err := db.Query(query)
 	if err != nil {
