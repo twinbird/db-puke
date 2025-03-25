@@ -18,9 +18,9 @@ db-puke -type mssql -h localhost -p 1433 -d sample_db -s sample_schema -u sample
 | `smallint`   | Number                  |
 | `tinyint`    | Number                  |
 | `bit`        | `0` / `1`               |
-| `float`      | `X.XXXXXXXXXX`          |
-| `real`       | `X.XXXXXXXXXX`          |
+| `float`      | Number (may be in scientific notation)  |
+| `real`       | Number (may be in scientific notation)  |
 | `varchar`    | String                  |
 | `char`       | String                  |
-| `datetime`   | `YYYY-MM-DD HH:MM:SS.sss` |
+| `datetime`   | `YYYY-MM-DD HH:MM:SS`   |
 

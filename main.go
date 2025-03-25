@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
+	"time"
 
 	_ "github.com/microsoft/go-mssqldb"
 )
@@ -188,27 +188,42 @@ func getOutputFilePath(outdir, tableName string) (string, error) {
 	return filePath, nil
 }
 
-func buildDataFetchQuery(schema, table string, column_type map[string]string) string {
-	query := "SELECT\n"
-
-	for col, _ := range column_type {
-		query += col + ",\n"
+func formatData(val any, ty string) string {
+	if val == nil {
+		return "NULL"
 	}
-	query = strings.TrimRight(query, ",\n")
 
-	query += fmt.Sprintf("\nFROM [%s].[%s]", schema, table)
+	switch ty {
+	case "INT":
+		return fmt.Sprintf("%d", val)
+	case "SMALLINT":
+		return fmt.Sprintf("%d", val)
+	case "TINYINT":
+		return fmt.Sprintf("%d", val)
+	case "BIT":
+		if val == true {
+			return "1"
+		} else {
+			return "0"
+		}
+	case "FLOAT":
+		return fmt.Sprintf("%g", val)
+	case "REAL":
+		return fmt.Sprintf("%g", val)
+	case "VARCHAR":
+		return fmt.Sprintf("%s", val)
+	case "CHAR":
+		return fmt.Sprintf("%s", val)
+	case "DATETIME":
+		t := (val).(time.Time)
+		return t.Format(time.DateTime)
+	}
 
-	return query
+	return "[NOT SUPPORTED COLUMN TYPE]"
 }
 
 func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
-	column_types, err := getColumnType(db, schema, table)
-	if err != nil {
-		return err
-	}
-
-	query := buildDataFetchQuery(schema, table, column_types)
-	rows, err := db.Query(query)
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table))
 	if err != nil {
 		return err
 	}
@@ -219,10 +234,16 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 		return err
 	}
 
+	column_types, err := rows.ColumnTypes()
+	if err != nil {
+		return err
+	}
+
 	fileName, err := getOutputFilePath(outdir, table)
 	if err != nil {
 		return err
 	}
+
 	file, err := os.Create(fileName)
 	if err != nil {
 		return err
@@ -236,8 +257,8 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 		return err
 	}
 
-	values := make([]interface{}, len(columns))
-	valuePtrs := make([]interface{}, len(columns))
+	values := make([]interface{}, len(column_types))
+	valuePtrs := make([]interface{}, len(column_types))
 
 	for i := range values {
 		valuePtrs[i] = &values[i]
@@ -249,12 +270,9 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 		}
 
 		var record []string
-		for _, val := range values {
-			if val == nil {
-				record = append(record, "NULL")
-			} else {
-				record = append(record, fmt.Sprintf("%v", val))
-			}
+		for i, val := range values {
+			ty := column_types[i]
+			record = append(record, formatData(val, ty.DatabaseTypeName()))
 		}
 
 		if err := writer.Write(record); err != nil {

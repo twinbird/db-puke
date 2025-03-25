@@ -242,7 +242,6 @@ shouldbeescape');
 	AssertCompareFiles(t, "testoutdir/mssql/test_varchar_column_table.csv", "testdata/mssql/test_varchar_column_table.csv")
 }
 
-/*
 func TestDatetimeColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
@@ -255,7 +254,7 @@ func TestDatetimeColumn(t *testing.T) {
 	// Insert test data
 	execSQL(`
 		USE dummy_database;
-		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24:12');
+		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24');
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
@@ -285,4 +284,3 @@ func TestBitColumn(t *testing.T) {
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_bit_column_table.csv", "testdata/mssql/test_bit_column_table.csv")
 }
-*/
