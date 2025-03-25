@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "github.com/microsoft/go-mssqldb"
 )
@@ -187,13 +188,26 @@ func getOutputFilePath(outdir, tableName string) (string, error) {
 	return filePath, nil
 }
 
+func buildDataFetchQuery(schema, table string, column_type map[string]string) string {
+	query := "SELECT\n"
+
+	for col, _ := range column_type {
+		query += col + ",\n"
+	}
+	query = strings.TrimRight(query, ",\n")
+
+	query += fmt.Sprintf("\nFROM [%s].[%s]", schema, table)
+
+	return query
+}
+
 func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 	column_types, err := getColumnType(db, schema, table)
 	if err != nil {
 		return err
 	}
 
-	query := fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table)
+	query := buildDataFetchQuery(schema, table, column_types)
 	rows, err := db.Query(query)
 	if err != nil {
 		return err
