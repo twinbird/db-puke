@@ -284,3 +284,57 @@ func TestBitColumn(t *testing.T) {
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_bit_column_table.csv", "testdata/mssql/test_bit_column_table.csv")
 }
+
+func TestMultipleTableOutput(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_multiple_table_output1;
+		CREATE TABLE dummy_schema.test_multiple_table_output1 (
+			col1 int NOT NULL PRIMARY KEY
+		);
+		DROP TABLE IF EXISTS dummy_schema.test_multiple_table_output2;
+		CREATE TABLE dummy_schema.test_multiple_table_output2 (
+			col2 int NOT NULL PRIMARY KEY
+		);
+		DROP TABLE IF EXISTS dummy_schema.test_multiple_table_output3;
+		CREATE TABLE dummy_schema.test_multiple_table_output3 (
+			col3 int NOT NULL PRIMARY KEY
+		);
+		DROP TABLE IF EXISTS dummy_schema.test_multiple_table_output4;
+		CREATE TABLE dummy_schema.test_multiple_table_output4 (
+			col4 int NOT NULL PRIMARY KEY
+		);
+		DROP TABLE IF EXISTS dummy_schema.test_multiple_table_output5;
+		CREATE TABLE dummy_schema.test_multiple_table_output5 (
+			col5 int NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_multiple_table_output1 (col1) VALUES (1);
+		INSERT INTO dummy_schema.test_multiple_table_output1 (col1) VALUES (10);
+
+		INSERT INTO dummy_schema.test_multiple_table_output2 (col2) VALUES (2);
+		INSERT INTO dummy_schema.test_multiple_table_output2 (col2) VALUES (20);
+
+		INSERT INTO dummy_schema.test_multiple_table_output3 (col3) VALUES (3);
+		INSERT INTO dummy_schema.test_multiple_table_output3 (col3) VALUES (30);
+
+		INSERT INTO dummy_schema.test_multiple_table_output4 (col4) VALUES (4);
+		INSERT INTO dummy_schema.test_multiple_table_output4 (col4) VALUES (40);
+
+		INSERT INTO dummy_schema.test_multiple_table_output5 (col5) VALUES (5);
+		INSERT INTO dummy_schema.test_multiple_table_output5 (col5) VALUES (50);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	exec(msSqlOption)
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output1.csv", "testdata/mssql/test_multiple_table_output1.csv")
+	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output2.csv", "testdata/mssql/test_multiple_table_output2.csv")
+	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output3.csv", "testdata/mssql/test_multiple_table_output3.csv")
+	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output4.csv", "testdata/mssql/test_multiple_table_output4.csv")
+	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output5.csv", "testdata/mssql/test_multiple_table_output5.csv")
+}

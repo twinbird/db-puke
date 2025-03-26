@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	_ "github.com/microsoft/go-mssqldb"
@@ -96,12 +97,18 @@ func exec(option *Option) {
 		log.Fatal("Failed to retrieve the list of tables", err)
 	}
 
+	wg := new(sync.WaitGroup)
+	wg.Add(len(tables))
 	for _, table := range tables {
-		err := exportTableToCSV(db, option.Schema, table, option.OutDir)
-		if err != nil {
-			log.Printf("Failed %s %v\n", table, err)
-		}
+		go func(t string) {
+			defer wg.Done()
+			err := exportTableToCSV(db, option.Schema, t, option.OutDir)
+			if err != nil {
+				log.Printf("Failed %s %v\n", t, err)
+			}
+		}(table)
 	}
+	wg.Wait()
 }
 
 func getTables(db *sql.DB, schema string) ([]string, error) {
