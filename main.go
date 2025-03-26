@@ -9,11 +9,17 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-type Config struct {
+const (
+	DBTypeMSSql = "mssql"
+)
+
+type Option struct {
 	DBType   string
 	Host     string
 	Port     int
@@ -24,45 +30,56 @@ type Config struct {
 	OutDir   string
 }
 
-func parseArgs() *Config {
-	config := &Config{}
+func parseArgs() *Option {
+	option := &Option{}
 
-	flag.StringVar(&config.DBType, "type", "mssql", "database type (mssql)")
-	flag.StringVar(&config.Host, "h", "localhost", "hostname")
-	flag.IntVar(&config.Port, "p", 1433, "port")
-	flag.StringVar(&config.Database, "d", "", "database")
-	flag.StringVar(&config.Schema, "s", "", "schema")
-	flag.StringVar(&config.User, "u", "", "username")
-	flag.StringVar(&config.Password, "P", "", "password")
-	flag.StringVar(&config.OutDir, "o", "db-puke-exported", "export dir")
+	flag.StringVar(&option.DBType, "type", "mssql", "database type (mssql)")
+	flag.StringVar(&option.Host, "h", "localhost", "hostname")
+	flag.IntVar(&option.Port, "p", 1433, "port")
+	flag.StringVar(&option.Database, "d", "", "database")
+	flag.StringVar(&option.Schema, "s", "", "schema")
+	flag.StringVar(&option.User, "u", "", "username")
+	flag.StringVar(&option.Password, "P", "", "password")
+	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export dir")
 
 	flag.Parse()
 
-	if config.Database == "" {
+	if option.DBType != DBTypeMSSql {
+		fmt.Println("Error: Specify database type is not supported")
+		os.Exit(1)
+	}
+
+	if option.Database == "" {
 		fmt.Println("Error: Please specify the database name (-d)")
 		os.Exit(1)
 	}
-	if config.Schema == "" {
+	if option.Schema == "" {
 		fmt.Println("Error: Please specify the schema name (-s)")
 		os.Exit(1)
 	}
-	if config.User == "" {
+	if option.User == "" {
 		fmt.Println("Error: Please specify the username (-u)")
 		os.Exit(1)
 	}
-	if config.Password == "" {
+	if option.Password == "" {
 		fmt.Println("Error: Please specify the database password (-P)")
 		os.Exit(1)
 	}
 
-	return config
+	return option
 }
 
 func main() {
-	config := parseArgs()
+	option := parseArgs()
 
+	exec(option)
+
+	os.Exit(0)
+}
+
+func exec(option *Option) {
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
-		config.User, config.Password, config.Host, config.Port, config.Database)
+		option.User, option.Password, option.Host, option.Port, option.Database)
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
@@ -75,20 +92,23 @@ func main() {
 		log.Fatal("Error: Failed to connect to the database", err)
 	}
 
-	tables, err := getTables(db, config.Schema)
+	tables, err := getTables(db, option.Schema)
 	if err != nil {
 		log.Fatal("Failed to retrieve the list of tables", err)
 	}
-	log.Println(tables)
 
+	wg := new(sync.WaitGroup)
+	wg.Add(len(tables))
 	for _, table := range tables {
-		err := exportTableToCSV(db, config.Schema, table, config.OutDir)
-		if err != nil {
-			log.Printf("Failed %s %v\n", table, err)
-		} else {
-			fmt.Printf("Success %s\n", table)
-		}
+		go func(t string) {
+			defer wg.Done()
+			err := exportTableToCSV(db, option.Schema, t, option.OutDir)
+			if err != nil {
+				log.Printf("Failed %s %v\n", t, err)
+			}
+		}(table)
 	}
+	wg.Wait()
 }
 
 func getTables(db *sql.DB, schema string) ([]string, error) {
@@ -122,6 +142,42 @@ func getTables(db *sql.DB, schema string) ([]string, error) {
 	return tables, nil
 }
 
+func getColumnType(db *sql.DB, schema_name, table_name string) (map[string]string, error) {
+	query := `
+		SELECT
+			 COLUMN_NAME
+			,DATA_TYPE
+		FROM
+			INFORMATION_SCHEMA.COLUMNS
+		WHERE
+			TABLE_NAME = @table_name
+		AND
+			TABLE_SCHEMA = @schema_name;
+	`
+	rows, err := db.QueryContext(
+		context.Background(),
+		query,
+		sql.Named("table_name", table_name),
+		sql.Named("schema_name", schema_name),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	columns := make(map[string]string, 0)
+	for rows.Next() {
+		var column_name, data_type string
+
+		err := rows.Scan(&column_name, &data_type)
+		if err != nil {
+			return nil, err
+		}
+		columns[column_name] = data_type
+	}
+	return columns, nil
+}
+
 func getOutputFilePath(outdir, tableName string) (string, error) {
 	absPath, err := filepath.Abs(outdir)
 	if err != nil {
@@ -139,9 +195,42 @@ func getOutputFilePath(outdir, tableName string) (string, error) {
 	return filePath, nil
 }
 
+func formatData(val any, ty string) string {
+	if val == nil {
+		return "NULL"
+	}
+
+	switch ty {
+	case "INT":
+		return fmt.Sprintf("%d", val)
+	case "SMALLINT":
+		return fmt.Sprintf("%d", val)
+	case "TINYINT":
+		return fmt.Sprintf("%d", val)
+	case "BIT":
+		if val == true {
+			return "1"
+		} else {
+			return "0"
+		}
+	case "FLOAT":
+		return fmt.Sprintf("%g", val)
+	case "REAL":
+		return fmt.Sprintf("%g", val)
+	case "VARCHAR":
+		return fmt.Sprintf("%s", val)
+	case "CHAR":
+		return fmt.Sprintf("%s", val)
+	case "DATETIME":
+		t := (val).(time.Time)
+		return t.Format(time.DateTime)
+	}
+
+	return "[NOT SUPPORTED COLUMN TYPE]"
+}
+
 func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
-	query := fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table)
-	rows, err := db.Query(query)
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table))
 	if err != nil {
 		return err
 	}
@@ -152,10 +241,16 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 		return err
 	}
 
+	column_types, err := rows.ColumnTypes()
+	if err != nil {
+		return err
+	}
+
 	fileName, err := getOutputFilePath(outdir, table)
 	if err != nil {
 		return err
 	}
+
 	file, err := os.Create(fileName)
 	if err != nil {
 		return err
@@ -169,8 +264,8 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 		return err
 	}
 
-	values := make([]interface{}, len(columns))
-	valuePtrs := make([]interface{}, len(columns))
+	values := make([]interface{}, len(column_types))
+	valuePtrs := make([]interface{}, len(column_types))
 
 	for i := range values {
 		valuePtrs[i] = &values[i]
@@ -182,12 +277,9 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 		}
 
 		var record []string
-		for _, val := range values {
-			if val == nil {
-				record = append(record, "NULL")
-			} else {
-				record = append(record, fmt.Sprintf("%v", val))
-			}
+		for i, val := range values {
+			ty := column_types[i]
+			record = append(record, formatData(val, ty.DatabaseTypeName()))
 		}
 
 		if err := writer.Write(record); err != nil {
