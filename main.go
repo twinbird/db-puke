@@ -229,38 +229,36 @@ func formatData(val any, ty string) string {
 	return "[NOT SUPPORTED COLUMN TYPE]"
 }
 
-func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
-	rows, err := db.Query(fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table))
+func createOutputFile(outdir, table string) (*os.File, error) {
+	fileName, err := getOutputFilePath(outdir, table)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer rows.Close()
 
+	file, err := os.Create(fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, err
+}
+
+func writeOutputHeader(rows *sql.Rows, writer *csv.Writer) error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
 	}
 
+	if err := writer.Write(columns); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func writeOutputBody(rows *sql.Rows, writer *csv.Writer) error {
 	column_types, err := rows.ColumnTypes()
 	if err != nil {
-		return err
-	}
-
-	fileName, err := getOutputFilePath(outdir, table)
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(fileName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	if err := writer.Write(columns); err != nil {
 		return err
 	}
 
@@ -288,4 +286,28 @@ func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
 	}
 
 	return nil
+}
+
+func exportTableToCSV(db *sql.DB, schema, table string, outdir string) error {
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM [%s].[%s]", schema, table))
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	file, err := createOutputFile(outdir, table)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	err = writeOutputHeader(rows, writer)
+	if err != nil {
+		return err
+	}
+
+	return writeOutputBody(rows, writer)
 }
