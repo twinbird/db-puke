@@ -338,3 +338,38 @@ func TestMultipleTableOutput(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output4.csv", "testdata/mssql/test_multiple_table_output4.csv")
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output5.csv", "testdata/mssql/test_multiple_table_output5.csv")
 }
+
+func TestMultipleColumnOutput(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_multiple_column_output;
+		CREATE TABLE dummy_schema.test_multiple_column_output (
+			col1 int NOT NULL PRIMARY KEY,
+			col2 varchar(32) NOT NULL,
+			col3 float,
+			col4 bit NOT NULL
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+
+		INSERT INTO dummy_schema.test_multiple_column_output (col1, col2, col3, col4)
+		VALUES (1, 'test row 1', 3.14, 0);
+
+		INSERT INTO dummy_schema.test_multiple_column_output (col1, col2, col3, col4)
+		VALUES (2, 'test row 2', NULL, 1);
+
+		INSERT INTO dummy_schema.test_multiple_column_output (col1, col2, col3, col4)
+		VALUES (3, '', NULL, 0);
+
+		INSERT INTO dummy_schema.test_multiple_column_output (col1, col2, col3, col4)
+		VALUES (4, 'TEST,STRING', 3.3, 1);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	exec(msSqlOption)
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_column_output.csv", "testdata/mssql/test_multiple_column_output.csv")
+}
