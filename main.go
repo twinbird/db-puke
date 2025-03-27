@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	DBPukeVersion = "0.0.2"
 	DBTypeMSSql = "mssql"
 )
 
@@ -33,14 +34,14 @@ type Option struct {
 func parseArgs() *Option {
 	option := &Option{}
 
-	flag.StringVar(&option.DBType, "type", "mssql", "database type (mssql)")
-	flag.StringVar(&option.Host, "h", "localhost", "hostname")
-	flag.IntVar(&option.Port, "p", 1433, "port")
+	flag.StringVar(&option.DBType, "type", "", "database server type [mssql]")
+	flag.StringVar(&option.Host, "h", "localhost", "database server host")
+	flag.IntVar(&option.Port, "p", 1433, "database server port")
 	flag.StringVar(&option.Database, "d", "", "database")
-	flag.StringVar(&option.Schema, "s", "", "schema")
-	flag.StringVar(&option.User, "u", "", "username")
-	flag.StringVar(&option.Password, "P", "", "password")
-	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export dir")
+	flag.StringVar(&option.Schema, "s", "", "database schema")
+	flag.StringVar(&option.User, "u", "", "database user name")
+	flag.StringVar(&option.Password, "P", "", "database user password")
+	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export directory")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `%s - database data exporter [version %s]
@@ -49,7 +50,7 @@ Usage:
   db-puke -type <database type> -h <hostname> -p <access port> -d <database name> -s <database schema> -u <username> -P <password> -o <output dir>
 
 Options:
-`, os.Args[0], "0.0.2")
+`, os.Args[0], DBPukeVersion)
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "  --help\n\tshow this help message and exit")
 	}
