@@ -42,6 +42,23 @@ func parseArgs() *Option {
 	flag.StringVar(&option.Password, "P", "", "password")
 	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export dir")
 
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, `%s - database data exporter [version %s]
+
+Usage:
+  db-puke -type <database type> -h <hostname> -p <access port> -d <database name> -s <database schema> -u <username> -P <password> -o <output dir>
+
+Options:
+`, os.Args[0], "0.0.2")
+		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "  --help\n\tshow this help message and exit")
+	}
+
+	if len(os.Args) == 1 {
+		flag.Usage()
+		os.Exit(0)
+	}
+
 	flag.Parse()
 
 	if option.DBType != DBTypeMSSql {
