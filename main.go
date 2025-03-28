@@ -17,7 +17,7 @@ import (
 
 const (
 	DBPukeVersion = "0.0.2"
-	DBTypeMSSql = "mssql"
+	DBTypeMSSql   = "mssql"
 )
 
 type Option struct {
@@ -158,42 +158,6 @@ func getTables(db *sql.DB, schema string) ([]string, error) {
 		tables = append(tables, tname)
 	}
 	return tables, nil
-}
-
-func getColumnType(db *sql.DB, schema_name, table_name string) (map[string]string, error) {
-	query := `
-		SELECT
-			 COLUMN_NAME
-			,DATA_TYPE
-		FROM
-			INFORMATION_SCHEMA.COLUMNS
-		WHERE
-			TABLE_NAME = @table_name
-		AND
-			TABLE_SCHEMA = @schema_name;
-	`
-	rows, err := db.QueryContext(
-		context.Background(),
-		query,
-		sql.Named("table_name", table_name),
-		sql.Named("schema_name", schema_name),
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	columns := make(map[string]string, 0)
-	for rows.Next() {
-		var column_name, data_type string
-
-		err := rows.Scan(&column_name, &data_type)
-		if err != nil {
-			return nil, err
-		}
-		columns[column_name] = data_type
-	}
-	return columns, nil
 }
 
 func getOutputFilePath(outdir, tableName string) (string, error) {
