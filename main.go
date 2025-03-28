@@ -19,6 +19,10 @@ const (
 	DBTypeMSSql   = "mssql"
 )
 
+var (
+	commandOption *Option
+)
+
 type Option struct {
 	DBType   string
 	Host     string
@@ -28,6 +32,7 @@ type Option struct {
 	User     string
 	Password string
 	OutDir   string
+	NullRepresent string
 }
 
 func parseArgs() *Option {
@@ -41,6 +46,7 @@ func parseArgs() *Option {
 	flag.StringVar(&option.User, "u", "", "database user name")
 	flag.StringVar(&option.Password, "P", "", "database user password")
 	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export directory")
+	flag.StringVar(&option.NullRepresent, "N", "NULL", "string to represent NULL")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `%s - database data exporter [version %s]
@@ -92,16 +98,16 @@ Options:
 }
 
 func main() {
-	option := parseArgs()
+	commandOption = parseArgs()
 
-	exec(option)
+	exec()
 
 	os.Exit(0)
 }
 
-func exec(option *Option) {
+func exec() {
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
-		option.User, option.Password, option.Host, option.Port, option.Database)
+		commandOption.User, commandOption.Password, commandOption.Host, commandOption.Port, commandOption.Database)
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
@@ -116,7 +122,7 @@ func exec(option *Option) {
 		os.Exit(1)
 	}
 
-	tables, err := getTables(db, option.Schema)
+	tables, err := getTables(db, commandOption.Schema)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to retrieve the list of tables. '%s'\n", err)
 		os.Exit(1)
@@ -127,7 +133,7 @@ func exec(option *Option) {
 	for _, table := range tables {
 		go func(t string) {
 			defer wg.Done()
-			err := exportTableToCSV(db, option.Schema, t, option.OutDir)
+			err := exportTableToCSV(db, commandOption.Schema, t, commandOption.OutDir)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Export failed: '%s' %s\n", t, err)
 			}
@@ -186,7 +192,7 @@ func getOutputFilePath(outdir, tableName string) (string, error) {
 
 func formatData(val any, ty string) string {
 	if val == nil {
-		return "NULL"
+		return commandOption.NullRepresent
 	}
 
 	switch ty {

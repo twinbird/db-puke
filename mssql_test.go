@@ -18,6 +18,7 @@ var msSqlOption = &Option{
 	User:     "sa",
 	Password: "saPassword1234",
 	OutDir:   "",
+	NullRepresent: "NULL",
 }
 
 func execSQL(query string) {
@@ -76,7 +77,8 @@ func TestIntColumn(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
 }
@@ -99,7 +101,8 @@ func TestSmallintColumn(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_smallint_column_table.csv", "testdata/mssql/test_smallint_column_table.csv")
 }
@@ -121,7 +124,8 @@ func TestTinyintColumn(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_tinyint_column_table.csv", "testdata/mssql/test_tinyint_column_table.csv")
 }
@@ -148,7 +152,8 @@ func TestFloatColumn(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_float_column_table.csv", "testdata/mssql/test_float_column_table.csv")
 }
@@ -175,7 +180,8 @@ func TestRealColumn(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_real_column_table.csv", "testdata/mssql/test_real_column_table.csv")
 }
@@ -206,7 +212,8 @@ shouldbeescape');
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_char_column_table.csv", "testdata/mssql/test_char_column_table.csv")
 }
@@ -237,7 +244,8 @@ shouldbeescape');
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_varchar_column_table.csv", "testdata/mssql/test_varchar_column_table.csv")
 }
@@ -258,7 +266,8 @@ func TestDatetimeColumn(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_datetime_column_table.csv", "testdata/mssql/test_datetime_column_table.csv")
 }
@@ -280,7 +289,8 @@ func TestBitColumn(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_bit_column_table.csv", "testdata/mssql/test_bit_column_table.csv")
 }
@@ -330,7 +340,8 @@ func TestMultipleTableOutput(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output1.csv", "testdata/mssql/test_multiple_table_output1.csv")
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output2.csv", "testdata/mssql/test_multiple_table_output2.csv")
@@ -369,7 +380,8 @@ func TestMultipleColumnOutput(t *testing.T) {
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
-	exec(msSqlOption)
+	commandOption = msSqlOption
+	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_column_output.csv", "testdata/mssql/test_multiple_column_output.csv")
 }
