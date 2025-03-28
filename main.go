@@ -6,7 +6,6 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -106,18 +105,21 @@ func exec(option *Option) {
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
-		log.Fatal("Error: Failed to connect to the database", err)
+		fmt.Fprintf(os.Stderr, "Failed to connect to the database. '%s'\n", err)
+		os.Exit(1)
 	}
 	defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("Error: Failed to connect to the database", err)
+		fmt.Fprintf(os.Stderr, "Failed to connect to the database. '%s'\n", err)
+		os.Exit(1)
 	}
 
 	tables, err := getTables(db, option.Schema)
 	if err != nil {
-		log.Fatal("Failed to retrieve the list of tables", err)
+		fmt.Fprintf(os.Stderr, "Failed to retrieve the list of tables. '%s'\n", err)
+		os.Exit(1)
 	}
 
 	wg := new(sync.WaitGroup)
@@ -127,7 +129,7 @@ func exec(option *Option) {
 			defer wg.Done()
 			err := exportTableToCSV(db, option.Schema, t, option.OutDir)
 			if err != nil {
-				log.Printf("Failed %s %v\n", t, err)
+				fmt.Fprintf(os.Stderr, "Export failed: '%s' %s\n", t, err)
 			}
 		}(table)
 	}
