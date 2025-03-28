@@ -62,6 +62,11 @@ Options:
 
 	flag.Parse()
 
+	if option.DBType == "" {
+		fmt.Println("Error: Please specify the database type (-type)")
+		os.Exit(1)
+	}
+
 	if option.DBType != DBTypeMSSql {
 		fmt.Println("Error: Specify database type is not supported")
 		os.Exit(1)
