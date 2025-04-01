@@ -215,6 +215,8 @@ func formatData(val any, ty *sql.ColumnType) string {
 		return fmt.Sprintf("%g", val)
 	case "VARCHAR":
 		return fmt.Sprintf("%s", val)
+	case "NVARCHAR":
+		return fmt.Sprintf("%s", val)
 	case "CHAR":
 		return fmt.Sprintf("%s", val)
 	case "DATETIME":

@@ -250,6 +250,38 @@ shouldbeescape');
 	AssertCompareFiles(t, "testoutdir/mssql/test_varchar_column_table.csv", "testdata/mssql/test_varchar_column_table.csv")
 }
 
+func TestNvarcharColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_nvarchar_column_table;
+		CREATE TABLE dummy_schema.test_nvarchar_column_table (
+			nvarchar_col nvarchar(30) NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('a');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('                             a');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('012345678901234567890123456789');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('nonescapestring:nonescapestrin');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('shouldbeescape
+shouldbeescape');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('shouldbeescape"shouldbeescape"');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('shouldbeescape,shouldbeescape,');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('TEST string');
+		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('日本語の文字列');
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_nvarchar_column_table.csv", "testdata/mssql/test_nvarchar_column_table.csv")
+}
+
 func TestDatetimeColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
