@@ -190,12 +190,13 @@ func getOutputFilePath(outdir, tableName string) (string, error) {
 	return filePath, nil
 }
 
-func formatData(val any, ty string) string {
+func formatData(val any, ty *sql.ColumnType) string {
 	if val == nil {
 		return commandOption.NullRepresent
 	}
+	tyname := ty.DatabaseTypeName()
 
-	switch ty {
+	switch tyname {
 	case "INT":
 		return fmt.Sprintf("%d", val)
 	case "SMALLINT":
@@ -274,7 +275,7 @@ func writeOutputBody(rows *sql.Rows, writer *csv.Writer) error {
 		var record []string
 		for i, val := range values {
 			ty := column_types[i]
-			record = append(record, formatData(val, ty.DatabaseTypeName()))
+			record = append(record, formatData(val, ty))
 		}
 
 		if err := writer.Write(record); err != nil {
