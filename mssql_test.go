@@ -186,6 +186,30 @@ func TestRealColumn(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_real_column_table.csv", "testdata/mssql/test_real_column_table.csv")
 }
 
+func TestDecimalColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_decimal_column_table;
+		CREATE TABLE dummy_schema.test_decimal_column_table (
+			decimal_col DECIMAL(15, 3) NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_decimal_column_table (decimal_col) VALUES (-999999999999.999);
+		INSERT INTO dummy_schema.test_decimal_column_table (decimal_col) VALUES (0);
+		INSERT INTO dummy_schema.test_decimal_column_table (decimal_col) VALUES (999999999999.999);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_decimal_column_table.csv", "testdata/mssql/test_decimal_column_table.csv")
+}
+
 func TestCharColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
