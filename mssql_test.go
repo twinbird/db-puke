@@ -272,6 +272,28 @@ func TestDatetimeColumn(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_datetime_column_table.csv", "testdata/mssql/test_datetime_column_table.csv")
 }
 
+func TestDatetime2Column(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_datetime2_column_table;
+		CREATE TABLE dummy_schema.test_datetime2_column_table (
+			datetime2_col datetime2 NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24');
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_datetime2_column_table.csv", "testdata/mssql/test_datetime2_column_table.csv")
+}
+
 func TestBitColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`

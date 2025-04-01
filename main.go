@@ -217,6 +217,8 @@ func formatData(val any, ty string) string {
 	case "CHAR":
 		return fmt.Sprintf("%s", val)
 	case "DATETIME":
+		fallthrough
+	case "DATETIME2":
 		t := (val).(time.Time)
 		return t.Format(time.DateTime)
 	}
