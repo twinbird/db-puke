@@ -10,14 +10,14 @@ import (
 )
 
 var msSqlOption = &Option{
-	DBType:   DBTypeMSSql,
-	Host:     "127.0.0.1",
-	Port:     1433,
-	Database: "dummy_database",
-	Schema:   "dummy_schema",
-	User:     "sa",
-	Password: "saPassword1234",
-	OutDir:   "",
+	DBType:        DBTypeMSSql,
+	Host:          "127.0.0.1",
+	Port:          1433,
+	Database:      "dummy_database",
+	Schema:        "dummy_schema",
+	User:          "sa",
+	Password:      "saPassword1234",
+	OutDir:        "",
 	NullRepresent: "NULL",
 }
 
@@ -263,6 +263,8 @@ func TestDatetimeColumn(t *testing.T) {
 	execSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24');
+		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24.123');
+		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24.997');
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"
@@ -284,7 +286,9 @@ func TestDatetime2Column(t *testing.T) {
 	// Insert test data
 	execSQL(`
 		USE dummy_database;
-		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24');
+		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24.0000000');
+		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24.1234567');
+		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24.9999999');
 	`)
 
 	msSqlOption.OutDir = "testoutdir/mssql"

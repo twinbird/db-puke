@@ -24,14 +24,14 @@ var (
 )
 
 type Option struct {
-	DBType   string
-	Host     string
-	Port     int
-	Database string
-	Schema   string
-	User     string
-	Password string
-	OutDir   string
+	DBType        string
+	Host          string
+	Port          int
+	Database      string
+	Schema        string
+	User          string
+	Password      string
+	OutDir        string
 	NullRepresent string
 }
 
@@ -218,10 +218,11 @@ func formatData(val any, ty *sql.ColumnType) string {
 	case "CHAR":
 		return fmt.Sprintf("%s", val)
 	case "DATETIME":
-		fallthrough
+		t := (val).(time.Time)
+		return t.Format("2006-01-02 15:04:05.000")
 	case "DATETIME2":
 		t := (val).(time.Time)
-		return t.Format(time.DateTime)
+		return t.Format("2006-01-02 15:04:05.0000000")
 	}
 
 	return "[NOT SUPPORTED COLUMN TYPE]"
