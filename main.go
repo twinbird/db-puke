@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	DBPukeVersion = "0.0.2"
+	DBPukeVersion = "0.0.3"
 	DBTypeMSSql   = "mssql"
 )
 
