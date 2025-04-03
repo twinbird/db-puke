@@ -225,6 +225,8 @@ func formatData(val any, ty *sql.ColumnType) string {
 	case "DATETIME2":
 		t := (val).(time.Time)
 		return t.Format("2006-01-02 15:04:05.0000000")
+	case "NUMERIC":
+		fallthrough
 	case "DECIMAL":
 		v := val.([]uint8)
 		return fmt.Sprintf("%s", string(v))
