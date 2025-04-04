@@ -199,6 +199,8 @@ func formatData(val any, ty *sql.ColumnType) string {
 	switch tyname {
 	case "INT":
 		return fmt.Sprintf("%d", val)
+	case "BIGINT":
+		return fmt.Sprintf("%d", val)
 	case "SMALLINT":
 		return fmt.Sprintf("%d", val)
 	case "TINYINT":

@@ -15,6 +15,7 @@ db-puke -type mssql -h localhost -p 1433 -d sample_db -s sample_schema -u sample
 | Data Type    | Output Format           |
 |--------------|-------------------------|
 | `int`        | Number                  |
+| `bigint`     | Number                  |
 | `smallint`   | Number                  |
 | `tinyint`    | Number                  |
 | `bit`        | `0` / `1`               |

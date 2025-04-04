@@ -83,6 +83,30 @@ func TestIntColumn(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
 }
 
+func TestBigIntColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_bigint_column_table;
+		CREATE TABLE dummy_schema.test_bigint_column_table (
+			bigint_col BIGINT NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_bigint_column_table (bigint_col) VALUES (-9223372036854775808);
+		INSERT INTO dummy_schema.test_bigint_column_table (bigint_col) VALUES (0);
+		INSERT INTO dummy_schema.test_bigint_column_table (bigint_col) VALUES (9223372036854775807);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_bigint_column_table.csv", "testdata/mssql/test_bigint_column_table.csv")
+}
+
 func TestSmallintColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
