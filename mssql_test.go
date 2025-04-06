@@ -425,6 +425,29 @@ func TestBitColumn(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_bit_column_table.csv", "testdata/mssql/test_bit_column_table.csv")
 }
 
+func TestUniqueidentifierColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_uniqueidentifier_column_table;
+		CREATE TABLE dummy_schema.test_uniqueidentifier_column_table (
+			uniqueidentifier_col uniqueidentifier NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_uniqueidentifier_column_table (uniqueidentifier_col) VALUES ('0E984725-C51C-4BF4-9960-E1C80E27ABA0');
+		INSERT INTO dummy_schema.test_uniqueidentifier_column_table (uniqueidentifier_col) VALUES ('4487A153-A228-4287-900C-FA2EF942B4EB');
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_uniqueidentifier_column_table.csv", "testdata/mssql/test_uniqueidentifier_column_table.csv")
+}
+
 func TestMultipleTableOutput(t *testing.T) {
 	// Create table for test
 	execSQL(`

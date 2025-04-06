@@ -28,4 +28,5 @@ db-puke -type mssql -h localhost -p 1433 -d sample_db -s sample_schema -u sample
 | `datetime2`  | `YYYY-MM-DD HH:MM:SS.mmmmmmm`  |
 | `decimal`    | Number                  |
 | `numeric`    | Number                  |
+| `uniqueidentifier | String (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) | 
 

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/microsoft/go-mssqldb"
+	mssql "github.com/microsoft/go-mssqldb"
 )
 
 const (
@@ -190,51 +190,60 @@ func getOutputFilePath(outdir, tableName string) (string, error) {
 	return filePath, nil
 }
 
-func formatData(val any, ty *sql.ColumnType) string {
+func formatData(val any, ty *sql.ColumnType) (string, error) {
 	if val == nil {
-		return commandOption.NullRepresent
+		return commandOption.NullRepresent, nil
 	}
 	tyname := ty.DatabaseTypeName()
 
 	switch tyname {
 	case "INT":
-		return fmt.Sprintf("%d", val)
+		return fmt.Sprintf("%d", val), nil
 	case "BIGINT":
-		return fmt.Sprintf("%d", val)
+		return fmt.Sprintf("%d", val), nil
 	case "SMALLINT":
-		return fmt.Sprintf("%d", val)
+		return fmt.Sprintf("%d", val), nil
 	case "TINYINT":
-		return fmt.Sprintf("%d", val)
+		return fmt.Sprintf("%d", val), nil
 	case "BIT":
 		if val == true {
-			return "1"
+			return "1", nil
 		} else {
-			return "0"
+			return "0", nil
 		}
 	case "FLOAT":
-		return fmt.Sprintf("%g", val)
+		return fmt.Sprintf("%g", val), nil
 	case "REAL":
-		return fmt.Sprintf("%g", val)
+		return fmt.Sprintf("%g", val), nil
 	case "VARCHAR":
-		return fmt.Sprintf("%s", val)
+		return fmt.Sprintf("%s", val), nil
 	case "NVARCHAR":
-		return fmt.Sprintf("%s", val)
+		return fmt.Sprintf("%s", val), nil
 	case "CHAR":
-		return fmt.Sprintf("%s", val)
+		return fmt.Sprintf("%s", val), nil
 	case "DATETIME":
 		t := (val).(time.Time)
-		return t.Format("2006-01-02 15:04:05.000")
+		return t.Format("2006-01-02 15:04:05.000"), nil
 	case "DATETIME2":
 		t := (val).(time.Time)
-		return t.Format("2006-01-02 15:04:05.0000000")
+		return t.Format("2006-01-02 15:04:05.0000000"), nil
 	case "NUMERIC":
 		fallthrough
 	case "DECIMAL":
 		v := val.([]uint8)
-		return fmt.Sprintf("%s", string(v))
+		return fmt.Sprintf("%s", string(v)), nil
+	case "UNIQUEIDENTIFIER":
+		byte_val := val.([]byte)
+
+		var guid mssql.UniqueIdentifier
+		if err := guid.Scan(byte_val); err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("%s", guid.String()), nil
 	}
 
-	return "[NOT SUPPORTED COLUMN TYPE]"
+	return "[NOT SUPPORTED COLUMN TYPE]", nil
 }
 
 func createOutputFile(outdir, table string) (*os.File, error) {
@@ -285,7 +294,11 @@ func writeOutputBody(rows *sql.Rows, writer *csv.Writer) error {
 		var record []string
 		for i, val := range values {
 			ty := column_types[i]
-			record = append(record, formatData(val, ty))
+			val_str, err := formatData(val, ty)
+			if err != nil {
+				return err
+			}
+			record = append(record, val_str)
 		}
 
 		if err := writer.Write(record); err != nil {
