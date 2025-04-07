@@ -24,6 +24,7 @@ db-puke -type mssql -h localhost -p 1433 -d sample_db -s sample_schema -u sample
 | `varchar`    | String                  |
 | `nvarchar`   | String                  |
 | `char`       | String                  |
+| `date`       | `YYYY-MM-DD`            |
 | `datetime`   | `YYYY-MM-DD HH:MM:SS.mmm`  |
 | `datetime2`  | `YYYY-MM-DD HH:MM:SS.mmmmmmm`  |
 | `decimal`    | Number                  |

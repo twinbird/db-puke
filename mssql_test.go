@@ -354,6 +354,30 @@ shouldbeescape');
 	AssertCompareFiles(t, "testoutdir/mssql/test_nvarchar_column_table.csv", "testdata/mssql/test_nvarchar_column_table.csv")
 }
 
+func TestDateColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_date_column_table;
+		CREATE TABLE dummy_schema.test_date_column_table (
+			date_col date NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_date_column_table (date_col) VALUES ('2025-01-01');
+		INSERT INTO dummy_schema.test_date_column_table (date_col) VALUES ('2025-03-03');
+		INSERT INTO dummy_schema.test_date_column_table (date_col) VALUES ('2025-12-31');
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_date_column_table.csv", "testdata/mssql/test_date_column_table.csv")
+}
+
 func TestDatetimeColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
