@@ -221,6 +221,8 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 		return fmt.Sprintf("%s", val), nil
 	case "CHAR":
 		return fmt.Sprintf("%s", val), nil
+	case "TEXT":
+		return fmt.Sprintf("%s", val), nil
 	case "DATE":
 		t := (val).(time.Time)
 		return t.Format("2006-01-02"), nil
