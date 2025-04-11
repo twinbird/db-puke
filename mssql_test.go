@@ -317,6 +317,33 @@ shouldbeescape');
 	AssertCompareFiles(t, "testoutdir/mssql/test_text_column_table.csv", "testdata/mssql/test_text_column_table.csv")
 }
 
+func TestNtextColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_ntext_column_table;
+		CREATE TABLE dummy_schema.test_ntext_column_table (
+			ntext_col NTEXT
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('');
+		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('a');
+		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('shouldbeescape
+shouldbeescape');
+		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('TEST string');
+		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('日本語の文字列');
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_ntext_column_table.csv", "testdata/mssql/test_ntext_column_table.csv")
+}
+
 func TestVarcharColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
