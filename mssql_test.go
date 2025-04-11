@@ -616,3 +616,39 @@ func TestMultipleColumnOutput(t *testing.T) {
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_column_output.csv", "testdata/mssql/test_multiple_column_output.csv")
 }
+
+func TestUnsupportedColumnOutput(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_unsupported_column_output;
+		CREATE TABLE dummy_schema.test_unsupported_column_output (
+			col1 int NOT NULL PRIMARY KEY,
+			unsupported_col sql_variant,
+			col2 varchar(32) NOT NULL,
+			col3 float
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+
+		INSERT INTO dummy_schema.test_unsupported_column_output (col1, unsupported_col, col2, col3)
+		VALUES (1, CAST(1 AS INT), 'test row 1', 3.14);
+
+		INSERT INTO dummy_schema.test_unsupported_column_output (col1, unsupported_col, col2, col3)
+		VALUES (2, CAST(1 AS INT), 'test row 2', NULL);
+
+		INSERT INTO dummy_schema.test_unsupported_column_output (col1, unsupported_col, col2, col3)
+		VALUES (3, CAST(1 AS INT), '', NULL);
+
+		INSERT INTO dummy_schema.test_unsupported_column_output (col1, unsupported_col, col2, col3)
+		VALUES (4, CAST(1 AS INT), 'TEST,STRING', 3.3);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_unsupported_column_output.csv", "testdata/mssql/test_unsupported_column_output.csv")
+}

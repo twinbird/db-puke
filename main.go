@@ -17,6 +17,7 @@ import (
 const (
 	DBPukeVersion = "0.0.3"
 	DBTypeMSSql   = "mssql"
+	UnsupportedColumnTypeOutput = "[UNSUPPORTED COLUMN TYPE]"
 )
 
 var (
@@ -250,7 +251,7 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 		return fmt.Sprintf("%s", guid.String()), nil
 	}
 
-	return "[NOT SUPPORTED COLUMN TYPE]", nil
+	return UnsupportedColumnTypeOutput, nil
 }
 
 func createOutputFile(outdir, table string) (*os.File, error) {

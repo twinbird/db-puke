@@ -10,6 +10,8 @@ db-puke -type mssql -h localhost -p 1433 -d sample_db -s sample_schema -u sample
 
 ## Data Types and Output Format
 
+The unsupported column types will be output as `[UNSUPPORTED COLUMN TYPE]`.
+
 ### MS SQL Server (type: mssql)
 
 | Data Type    | Output Format           |
