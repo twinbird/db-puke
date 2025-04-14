@@ -199,11 +199,11 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 
 	switch tyname {
 	case "INT":
-		return fmt.Sprintf("%d", val), nil
+		fallthrough
 	case "BIGINT":
-		return fmt.Sprintf("%d", val), nil
+		fallthrough
 	case "SMALLINT":
-		return fmt.Sprintf("%d", val), nil
+		fallthrough
 	case "TINYINT":
 		return fmt.Sprintf("%d", val), nil
 	case "BIT":
@@ -213,17 +213,19 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 			return "0", nil
 		}
 	case "FLOAT":
-		return fmt.Sprintf("%g", val), nil
+		fallthrough
 	case "REAL":
 		return fmt.Sprintf("%g", val), nil
 	case "VARCHAR":
-		return fmt.Sprintf("%s", val), nil
+		fallthrough
 	case "NVARCHAR":
-		return fmt.Sprintf("%s", val), nil
+		fallthrough
 	case "CHAR":
-		return fmt.Sprintf("%s", val), nil
+		fallthrough
+	case "NCHAR":
+		fallthrough
 	case "TEXT":
-		return fmt.Sprintf("%s", val), nil
+		fallthrough
 	case "NTEXT":
 		return fmt.Sprintf("%s", val), nil
 	case "DATE":

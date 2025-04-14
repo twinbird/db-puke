@@ -290,6 +290,38 @@ shouldbeescape');
 	AssertCompareFiles(t, "testoutdir/mssql/test_char_column_table.csv", "testdata/mssql/test_char_column_table.csv")
 }
 
+func TestNcharColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_nchar_column_table;
+		CREATE TABLE dummy_schema.test_nchar_column_table (
+			nchar_col NCHAR(30) NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('a');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('                             a');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('012345678901234567890123456789');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('nonescapestring:nonescapestrin');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('shouldbeescape
+shouldbeescape');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('shouldbeescape"shouldbeescape"');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('shouldbeescape,shouldbeescape,');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('TEST string');
+		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('日本語の文字列');
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_nchar_column_table.csv", "testdata/mssql/test_nchar_column_table.csv")
+}
+
 func TestTextColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`

@@ -26,6 +26,7 @@ The unsupported column types will be output as `[UNSUPPORTED COLUMN TYPE]`.
 | `varchar`    | String                  |
 | `nvarchar`   | String                  |
 | `char`       | String                  |
+| `nchar`      | String                  |
 | `text`       | String                  |
 | `ntext`      | String                  |
 | `date`       | `YYYY-MM-DD`            |
