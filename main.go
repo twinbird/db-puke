@@ -237,6 +237,9 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 	case "DATETIME2":
 		t := (val).(time.Time)
 		return t.Format("2006-01-02 15:04:05.0000000"), nil
+	case "SMALLDATETIME":
+		t := (val).(time.Time)
+		return t.Format("2006-01-02 15:04:05"), nil
 	case "NUMERIC":
 		fallthrough
 	case "DECIMAL":

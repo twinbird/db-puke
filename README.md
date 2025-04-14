@@ -32,6 +32,7 @@ The unsupported column types will be output as `[UNSUPPORTED COLUMN TYPE]`.
 | `date`       | `YYYY-MM-DD`            |
 | `datetime`   | `YYYY-MM-DD HH:MM:SS.mmm`  |
 | `datetime2`  | `YYYY-MM-DD HH:MM:SS.mmmmmmm`  |
+| `smalldatetime`  | `YYYY-MM-DD HH:MM:SS`  |
 | `decimal`    | Number                  |
 | `numeric`    | Number                  |
 | `uniqueidentifier | String (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) | 
