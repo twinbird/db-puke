@@ -35,5 +35,6 @@ The unsupported column types will be output as `[UNSUPPORTED COLUMN TYPE]`.
 | `smalldatetime`  | `YYYY-MM-DD HH:MM:SS`  |
 | `decimal`    | Number                  |
 | `numeric`    | Number                  |
+| `money`      | Number                  |
 | `uniqueidentifier | String (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) | 
 

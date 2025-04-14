@@ -240,6 +240,8 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 	case "SMALLDATETIME":
 		t := (val).(time.Time)
 		return t.Format("2006-01-02 15:04:05"), nil
+	case "MONEY":
+		fallthrough
 	case "NUMERIC":
 		fallthrough
 	case "DECIMAL":

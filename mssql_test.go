@@ -536,6 +536,34 @@ func TestDatetime2Column(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_datetime2_column_table.csv", "testdata/mssql/test_datetime2_column_table.csv")
 }
 
+func TestMoneyColumn(t *testing.T) {
+	// Create table for test
+	execSQL(`
+		USE dummy_database;
+		DROP TABLE IF EXISTS dummy_schema.test_money_column_table;
+		CREATE TABLE dummy_schema.test_money_column_table (
+			money_col money NOT NULL PRIMARY KEY
+		);
+	`)
+	// Insert test data
+	execSQL(`
+		USE dummy_database;
+		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (-922337203685477);
+		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (-922337203685477.5808);
+
+		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (0);
+
+		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (922337203685477);
+		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (922337203685477.5807);
+	`)
+
+	msSqlOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlOption
+	exec()
+
+	AssertCompareFiles(t, "testoutdir/mssql/test_money_column_table.csv", "testdata/mssql/test_money_column_table.csv")
+}
+
 func TestBitColumn(t *testing.T) {
 	// Create table for test
 	execSQL(`
