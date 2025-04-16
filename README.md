@@ -36,5 +36,6 @@ The unsupported column types will be output as `[UNSUPPORTED COLUMN TYPE]`.
 | `decimal`    | Number                  |
 | `numeric`    | Number                  |
 | `money`      | Number                  |
+| `smallmoney`      | Number                  |
 | `uniqueidentifier | String (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) | 
 
