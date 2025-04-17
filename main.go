@@ -18,6 +18,7 @@ const (
 	DBPukeVersion = "0.0.3"
 	DBTypeMSSql   = "mssql"
 	UnsupportedColumnTypeOutput = "[UNSUPPORTED COLUMN TYPE]"
+	DBPukeEnvironmentNamePassword = "DB_PUKE_PASSWORD"
 )
 
 var (
@@ -67,6 +68,10 @@ Options:
 	}
 
 	flag.Parse()
+
+	if pass, ok := os.LookupEnv(DBPukeEnvironmentNamePassword); ok {
+		option.Password = pass
+	}
 
 	if option.DBType == "" {
 		fmt.Println("Error: Please specify the database type (-type)")
