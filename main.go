@@ -46,7 +46,7 @@ func parseArgs() *Option {
 	flag.StringVar(&option.Database, "d", "", "database")
 	flag.StringVar(&option.Schema, "s", "", "database schema")
 	flag.StringVar(&option.User, "u", "", "database user name")
-	flag.StringVar(&option.Password, "P", "", "database user password")
+	flag.StringVar(&option.Password, "P", "", "database user password(or use DB_PUKE_PASSWORD env var)")
 	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export directory")
 	flag.StringVar(&option.NullRepresent, "N", "NULL", "string to represent NULL")
 
@@ -55,6 +55,10 @@ func parseArgs() *Option {
 
 Usage:
   db-puke -type <database type> -h <hostname> -p <access port> -d <database name> -s <database schema> -u <username> -P <password> -o <output dir>
+
+Example:
+  mssql:
+    DB_PUKE_PASSWORD=saPassword1234 ./db-puke -type mssql -h localhost -p 1433 -d dummy_database -s dummy_schema -u sa -o outdir
 
 Options:
 `, os.Args[0], DBPukeVersion)
