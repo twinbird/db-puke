@@ -4,8 +4,24 @@
 
 ## Usage
 
+### MSSQL(SQLServer)
+
+Currently, only SQL Server authentication is supported.
+
 ```
-db-puke -type mssql -h localhost -p 1433 -d sample_db -s sample_schema -u sample_user -p user_password -o outdir
+DB_PUKE_PASSWORD=[Your DB Password] db-puke -type mssql -h [Your DB Host] -p [Your DB Port] -d [Your DB Name] -s [Your DB Schema] -u [Your DB Username] -o [Export Directory Name]
+```
+
+or use -P option
+
+```
+db-puke -type mssql -h [Your DB Host] -p [Your DB Port] -d [Your DB Name] -s [Your DB Schema] -u [Your DB Username] -P [Your DB Password] -o [Export Directory Name]
+```
+
+#### Command example
+
+```
+DB_PUKE_PASSWORD=saPassword1234 ./db-puke -type mssql -h localhost -p 1433 -d dummy_database -s dummy_schema -u sa -o outdir
 ```
 
 ## Data Types and Output Format
