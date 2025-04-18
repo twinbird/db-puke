@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -15,9 +16,9 @@ import (
 )
 
 const (
-	DBPukeVersion = "0.0.3"
-	DBTypeMSSql   = "mssql"
-	UnsupportedColumnTypeOutput = "[UNSUPPORTED COLUMN TYPE]"
+	DBPukeVersion                 = "0.0.3"
+	DBTypeMSSql                   = "mssql"
+	UnsupportedColumnTypeOutput   = "[UNSUPPORTED COLUMN TYPE]"
 	DBPukeEnvironmentNamePassword = "DB_PUKE_PASSWORD"
 )
 
@@ -26,15 +27,17 @@ var (
 )
 
 type Option struct {
-	DBType        string
-	Host          string
-	Port          int
-	Database      string
-	Schema        string
-	User          string
-	Password      string
-	OutDir        string
-	NullRepresent string
+	DBType           string
+	Host             string
+	Port             int
+	Database         string
+	Schema           string
+	User             string
+	Password         string
+	OutDir           string
+	NullRepresent    string
+	TableNames       string
+	ParsedTableNames []string
 }
 
 func parseArgs() *Option {
@@ -49,6 +52,7 @@ func parseArgs() *Option {
 	flag.StringVar(&option.Password, "P", "", "database user password(or use DB_PUKE_PASSWORD env var)")
 	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export directory")
 	flag.StringVar(&option.NullRepresent, "N", "NULL", "string to represent NULL")
+	flag.StringVar(&option.TableNames, "t", "", "table names to export (comma-separated). exports all tables if omitted.")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `%s - database data exporter [version %s]
@@ -104,7 +108,22 @@ Options:
 		os.Exit(1)
 	}
 
+	option.ParsedTableNames = parseTableOption(option.TableNames)
+
 	return option
+}
+
+func parseTableOption(opstr string) []string {
+	s := strings.Trim(opstr, " ")
+	splitted := strings.Split(s, ",")
+	ret := make([]string, 0)
+	for _, tname := range splitted {
+		tname = strings.Trim(tname, " ")
+		if tname != "" {
+			ret = append(ret, tname)
+		}
+	}
+	return ret
 }
 
 func main() {
@@ -132,10 +151,14 @@ func exec() {
 		os.Exit(1)
 	}
 
-	tables, err := getTables(db, commandOption.Schema)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to retrieve the list of tables. '%s'\n", err)
-		os.Exit(1)
+	tables := commandOption.ParsedTableNames
+	if len(commandOption.ParsedTableNames) == 0 {
+		all_tables, err := getTables(db, commandOption.Schema)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to retrieve the list of tables. '%s'\n", err)
+			os.Exit(1)
+		}
+		tables = all_tables
 	}
 
 	wg := new(sync.WaitGroup)
