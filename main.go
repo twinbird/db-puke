@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	DBPukeVersion                 = "0.0.3"
+	DBPukeVersion                 = "0.0.4"
 	DBTypeMSSql                   = "mssql"
 	UnsupportedColumnTypeOutput   = "[UNSUPPORTED COLUMN TYPE]"
 	DBPukeEnvironmentNamePassword = "DB_PUKE_PASSWORD"
