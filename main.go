@@ -87,7 +87,7 @@ Options:
 	case DBTypeMSSql:
 		parseMssqlOption(option)
 	default:
-		fmt.Printf("Error: Specify database type(%s) is not supported\n", option.DBType)
+		fmt.Fprintf(os.Stderr, "Error: Specify database type(%s) is not supported\n", option.DBType)
 		os.Exit(1)
 	}
 
@@ -98,19 +98,19 @@ Options:
 
 func parseMssqlOption(option *Option) {
 	if option.Database == "" {
-		fmt.Println("Error: Please specify the database name (-d)")
+		fmt.Fprintln(os.Stderr, "Error: Please specify the database name (-d)")
 		os.Exit(1)
 	}
 	if option.Schema == "" {
-		fmt.Println("Error: Please specify the schema name (-s)")
+		fmt.Fprintln(os.Stderr, "Error: Please specify the schema name (-s)")
 		os.Exit(1)
 	}
 	if option.User == "" {
-		fmt.Println("Error: Please specify the username (-u)")
+		fmt.Fprintln(os.Stderr, "Error: Please specify the username (-u)")
 		os.Exit(1)
 	}
 	if option.Password == "" {
-		fmt.Println("Error: Please specify the database password (-P)")
+		fmt.Fprintln(os.Stderr, "Error: Please specify the database password (-P)")
 		os.Exit(1)
 	}
 	if option.PortString == "" {
@@ -118,7 +118,7 @@ func parseMssqlOption(option *Option) {
 	} else {
 		port, err := strconv.Atoi(option.PortString)
 		if err != nil {
-			fmt.Println("Error: Invalid port number (-p)")
+			fmt.Fprintln(os.Stderr, "Error: Invalid port number (-p)")
 			os.Exit(1)
 		}
 		option.Port = port
