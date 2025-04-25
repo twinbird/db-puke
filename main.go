@@ -209,12 +209,12 @@ func getTables(db *sql.DB, schema string) ([]string, error) {
 func getOutputFilePath(outdir, tableName string) (string, error) {
 	absPath, err := filepath.Abs(outdir)
 	if err != nil {
-		return "", fmt.Errorf("Error retrieving output directory path: %w", err)
+		return "", fmt.Errorf("error retrieving output directory path: %w", err)
 	}
 
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(absPath, 0755); err != nil {
-			return "", fmt.Errorf("Error creating output directory: %w", err)
+			return "", fmt.Errorf("error creating output directory: %w", err)
 		}
 	}
 
@@ -280,7 +280,7 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 		fallthrough
 	case "DECIMAL":
 		v := val.([]uint8)
-		return fmt.Sprintf("%s", string(v)), nil
+		return string(v), nil
 	case "UNIQUEIDENTIFIER":
 		byte_val := val.([]byte)
 
@@ -289,7 +289,7 @@ func formatData(val any, ty *sql.ColumnType) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("%s", guid.String()), nil
+		return guid.String(), nil
 	}
 
 	return UnsupportedColumnTypeOutput, nil
