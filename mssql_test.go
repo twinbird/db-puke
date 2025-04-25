@@ -9,7 +9,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-var msSqlOption = &Option{
+var msSqlTestOption = &Option{
 	DBType:        DBTypeMSSql,
 	Host:          "127.0.0.1",
 	Port:          1433,
@@ -21,9 +21,9 @@ var msSqlOption = &Option{
 	NullRepresent: "NULL",
 }
 
-func execSQL(query string) {
+func execMssqlTestSQL(query string) {
 	connString := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&encrypt=disable",
-		msSqlOption.User, msSqlOption.Password, msSqlOption.Host, msSqlOption.Port, "")
+		msSqlTestOption.User, msSqlTestOption.Password, msSqlTestOption.Host, msSqlTestOption.Port, "")
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
@@ -37,13 +37,13 @@ func execSQL(query string) {
 	}
 }
 
-func createDatabaseAndSchema() {
-	execSQL(`
+func createTestDatabaseAndSchemaMssql() {
+	execMssqlTestSQL(`
 		DROP DATABASE IF EXISTS dummy_database;
 		CREATE DATABASE dummy_database;
 	`)
 
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'dummy_schema')
 		BEGIN
@@ -54,14 +54,14 @@ func createDatabaseAndSchema() {
 
 func TestMain(m *testing.M) {
 	RemoveTestOutputFile("testoutdir/mssql")
-	createDatabaseAndSchema()
+	createTestDatabaseAndSchemaMssql()
 
 	m.Run()
 }
 
-func TestIntColumn(t *testing.T) {
+func TestMssqlIntColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_int_column_table;
 		CREATE TABLE dummy_schema.test_int_column_table (
@@ -69,23 +69,23 @@ func TestIntColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (-2147483648);
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (0);
 		INSERT INTO dummy_schema.test_int_column_table (int_col) VALUES (2147483647);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_int_column_table.csv", "testdata/mssql/test_int_column_table.csv")
 }
 
-func TestBigIntColumn(t *testing.T) {
+func TestMssqlBigIntColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_bigint_column_table;
 		CREATE TABLE dummy_schema.test_bigint_column_table (
@@ -93,23 +93,23 @@ func TestBigIntColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_bigint_column_table (bigint_col) VALUES (-9223372036854775808);
 		INSERT INTO dummy_schema.test_bigint_column_table (bigint_col) VALUES (0);
 		INSERT INTO dummy_schema.test_bigint_column_table (bigint_col) VALUES (9223372036854775807);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_bigint_column_table.csv", "testdata/mssql/test_bigint_column_table.csv")
 }
 
-func TestSmallintColumn(t *testing.T) {
+func TestMssqlSmallintColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_smallint_column_table;
 		CREATE TABLE dummy_schema.test_smallint_column_table (
@@ -117,23 +117,23 @@ func TestSmallintColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (-32768);
 		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (0);
 		INSERT INTO dummy_schema.test_smallint_column_table (smallint_col) VALUES (32767);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_smallint_column_table.csv", "testdata/mssql/test_smallint_column_table.csv")
 }
 
-func TestTinyintColumn(t *testing.T) {
+func TestMssqlTinyintColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_tinyint_column_table;
 		CREATE TABLE dummy_schema.test_tinyint_column_table (
@@ -141,22 +141,22 @@ func TestTinyintColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_tinyint_column_table (tinyint_col) VALUES (0);
 		INSERT INTO dummy_schema.test_tinyint_column_table (tinyint_col) VALUES (255);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_tinyint_column_table.csv", "testdata/mssql/test_tinyint_column_table.csv")
 }
 
-func TestFloatColumn(t *testing.T) {
+func TestMssqlFloatColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_float_column_table;
 		CREATE TABLE dummy_schema.test_float_column_table (
@@ -164,7 +164,7 @@ func TestFloatColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (-1.79E+308);
 		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (-2.23E-308);
@@ -175,16 +175,16 @@ func TestFloatColumn(t *testing.T) {
 		INSERT INTO dummy_schema.test_float_column_table (float_col) VALUES (1.79E+308);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_float_column_table.csv", "testdata/mssql/test_float_column_table.csv")
 }
 
-func TestRealColumn(t *testing.T) {
+func TestMssqlRealColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_real_column_table;
 		CREATE TABLE dummy_schema.test_real_column_table (
@@ -192,7 +192,7 @@ func TestRealColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (-3.40E+38);
 		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (-1.18E-38);
@@ -203,16 +203,16 @@ func TestRealColumn(t *testing.T) {
 		INSERT INTO dummy_schema.test_real_column_table (real_col) VALUES (3.40E+38);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_real_column_table.csv", "testdata/mssql/test_real_column_table.csv")
 }
 
-func TestDecimalColumn(t *testing.T) {
+func TestMssqlDecimalColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_decimal_column_table;
 		CREATE TABLE dummy_schema.test_decimal_column_table (
@@ -220,23 +220,23 @@ func TestDecimalColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_decimal_column_table (decimal_col) VALUES (-999999999999.999);
 		INSERT INTO dummy_schema.test_decimal_column_table (decimal_col) VALUES (0);
 		INSERT INTO dummy_schema.test_decimal_column_table (decimal_col) VALUES (999999999999.999);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_decimal_column_table.csv", "testdata/mssql/test_decimal_column_table.csv")
 }
 
-func TestNumericColumn(t *testing.T) {
+func TestMssqlNumericColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_numeric_column_table;
 		CREATE TABLE dummy_schema.test_numeric_column_table (
@@ -244,23 +244,23 @@ func TestNumericColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_numeric_column_table (numeric_col) VALUES (-999999999999.999);
 		INSERT INTO dummy_schema.test_numeric_column_table (numeric_col) VALUES (0);
 		INSERT INTO dummy_schema.test_numeric_column_table (numeric_col) VALUES (999999999999.999);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_numeric_column_table.csv", "testdata/mssql/test_numeric_column_table.csv")
 }
 
-func TestCharColumn(t *testing.T) {
+func TestMssqlCharColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_char_column_table;
 		CREATE TABLE dummy_schema.test_char_column_table (
@@ -268,7 +268,7 @@ func TestCharColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('');
 		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('a');
@@ -283,16 +283,16 @@ shouldbeescape');
 		INSERT INTO dummy_schema.test_char_column_table (char_col) VALUES ('日本語の文字列');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_char_column_table.csv", "testdata/mssql/test_char_column_table.csv")
 }
 
-func TestNcharColumn(t *testing.T) {
+func TestMssqlNcharColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_nchar_column_table;
 		CREATE TABLE dummy_schema.test_nchar_column_table (
@@ -300,7 +300,7 @@ func TestNcharColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('');
 		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('a');
@@ -315,16 +315,16 @@ shouldbeescape');
 		INSERT INTO dummy_schema.test_nchar_column_table (nchar_col) VALUES ('日本語の文字列');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_nchar_column_table.csv", "testdata/mssql/test_nchar_column_table.csv")
 }
 
-func TestTextColumn(t *testing.T) {
+func TestMssqlTextColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_text_column_table;
 		CREATE TABLE dummy_schema.test_text_column_table (
@@ -332,7 +332,7 @@ func TestTextColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_text_column_table (text_col) VALUES ('');
 		INSERT INTO dummy_schema.test_text_column_table (text_col) VALUES ('a');
@@ -342,16 +342,16 @@ shouldbeescape');
 		INSERT INTO dummy_schema.test_text_column_table (text_col) VALUES ('日本語の文字列');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_text_column_table.csv", "testdata/mssql/test_text_column_table.csv")
 }
 
-func TestNtextColumn(t *testing.T) {
+func TestMssqlNtextColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_ntext_column_table;
 		CREATE TABLE dummy_schema.test_ntext_column_table (
@@ -359,7 +359,7 @@ func TestNtextColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('');
 		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('a');
@@ -369,16 +369,16 @@ shouldbeescape');
 		INSERT INTO dummy_schema.test_ntext_column_table (ntext_col) VALUES ('日本語の文字列');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_ntext_column_table.csv", "testdata/mssql/test_ntext_column_table.csv")
 }
 
-func TestVarcharColumn(t *testing.T) {
+func TestMssqlVarcharColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_varchar_column_table;
 		CREATE TABLE dummy_schema.test_varchar_column_table (
@@ -386,7 +386,7 @@ func TestVarcharColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_varchar_column_table (varchar_col) VALUES ('');
 		INSERT INTO dummy_schema.test_varchar_column_table (varchar_col) VALUES ('a');
@@ -401,16 +401,16 @@ shouldbeescape');
 		INSERT INTO dummy_schema.test_varchar_column_table (varchar_col) VALUES ('日本語の文字列');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_varchar_column_table.csv", "testdata/mssql/test_varchar_column_table.csv")
 }
 
-func TestNvarcharColumn(t *testing.T) {
+func TestMssqlNvarcharColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_nvarchar_column_table;
 		CREATE TABLE dummy_schema.test_nvarchar_column_table (
@@ -418,7 +418,7 @@ func TestNvarcharColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('');
 		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('a');
@@ -433,16 +433,16 @@ shouldbeescape');
 		INSERT INTO dummy_schema.test_nvarchar_column_table (nvarchar_col) VALUES ('日本語の文字列');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_nvarchar_column_table.csv", "testdata/mssql/test_nvarchar_column_table.csv")
 }
 
-func TestDateColumn(t *testing.T) {
+func TestMssqlDateColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_date_column_table;
 		CREATE TABLE dummy_schema.test_date_column_table (
@@ -450,23 +450,23 @@ func TestDateColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_date_column_table (date_col) VALUES ('2025-01-01');
 		INSERT INTO dummy_schema.test_date_column_table (date_col) VALUES ('2025-03-03');
 		INSERT INTO dummy_schema.test_date_column_table (date_col) VALUES ('2025-12-31');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_date_column_table.csv", "testdata/mssql/test_date_column_table.csv")
 }
 
-func TestDatetimeColumn(t *testing.T) {
+func TestMssqlDatetimeColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_datetime_column_table;
 		CREATE TABLE dummy_schema.test_datetime_column_table (
@@ -474,23 +474,23 @@ func TestDatetimeColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24');
 		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24.123');
 		INSERT INTO dummy_schema.test_datetime_column_table (datetime_col) VALUES ('2025-03-22 21:54:24.997');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_datetime_column_table.csv", "testdata/mssql/test_datetime_column_table.csv")
 }
 
-func TestSmalldatetimeColumn(t *testing.T) {
+func TestMssqlSmalldatetimeColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_smalldatetime_column_table;
 		CREATE TABLE dummy_schema.test_smalldatetime_column_table (
@@ -498,23 +498,23 @@ func TestSmalldatetimeColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_smalldatetime_column_table (smalldatetime_col) VALUES ('2025-03-22 21:54:24');
 		INSERT INTO dummy_schema.test_smalldatetime_column_table (smalldatetime_col) VALUES ('2025-03-22 21:55:24');
 		INSERT INTO dummy_schema.test_smalldatetime_column_table (smalldatetime_col) VALUES ('2025-03-22 21:55:34');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_smalldatetime_column_table.csv", "testdata/mssql/test_smalldatetime_column_table.csv")
 }
 
-func TestDatetime2Column(t *testing.T) {
+func TestMssqlDatetime2Column(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_datetime2_column_table;
 		CREATE TABLE dummy_schema.test_datetime2_column_table (
@@ -522,23 +522,23 @@ func TestDatetime2Column(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24.0000000');
 		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24.1234567');
 		INSERT INTO dummy_schema.test_datetime2_column_table (datetime2_col) VALUES ('2025-03-22 21:54:24.9999999');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_datetime2_column_table.csv", "testdata/mssql/test_datetime2_column_table.csv")
 }
 
-func TestMoneyColumn(t *testing.T) {
+func TestMssqlMoneyColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_money_column_table;
 		CREATE TABLE dummy_schema.test_money_column_table (
@@ -546,7 +546,7 @@ func TestMoneyColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (-922337203685477);
 		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (-922337203685477.5808);
@@ -557,16 +557,16 @@ func TestMoneyColumn(t *testing.T) {
 		INSERT INTO dummy_schema.test_money_column_table (money_col) VALUES (922337203685477.5807);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_money_column_table.csv", "testdata/mssql/test_money_column_table.csv")
 }
 
-func TestSmallmoneyColumn(t *testing.T) {
+func TestMssqlSmallmoneyColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_smallmoney_column_table;
 		CREATE TABLE dummy_schema.test_smallmoney_column_table (
@@ -574,7 +574,7 @@ func TestSmallmoneyColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_smallmoney_column_table (smallmoney_col) VALUES (-214748.3648);
 		INSERT INTO dummy_schema.test_smallmoney_column_table (smallmoney_col) VALUES (-214748);
@@ -585,16 +585,16 @@ func TestSmallmoneyColumn(t *testing.T) {
 		INSERT INTO dummy_schema.test_smallmoney_column_table (smallmoney_col) VALUES (214748.3647);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_smallmoney_column_table.csv", "testdata/mssql/test_smallmoney_column_table.csv")
 }
 
-func TestBitColumn(t *testing.T) {
+func TestMssqlBitColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_bit_column_table;
 		CREATE TABLE dummy_schema.test_bit_column_table (
@@ -602,22 +602,22 @@ func TestBitColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_bit_column_table (bit_col) VALUES (0);
 		INSERT INTO dummy_schema.test_bit_column_table (bit_col) VALUES (1);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_bit_column_table.csv", "testdata/mssql/test_bit_column_table.csv")
 }
 
-func TestUniqueidentifierColumn(t *testing.T) {
+func TestMssqlUniqueidentifierColumn(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_uniqueidentifier_column_table;
 		CREATE TABLE dummy_schema.test_uniqueidentifier_column_table (
@@ -625,22 +625,22 @@ func TestUniqueidentifierColumn(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_uniqueidentifier_column_table (uniqueidentifier_col) VALUES ('0E984725-C51C-4BF4-9960-E1C80E27ABA0');
 		INSERT INTO dummy_schema.test_uniqueidentifier_column_table (uniqueidentifier_col) VALUES ('4487A153-A228-4287-900C-FA2EF942B4EB');
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_uniqueidentifier_column_table.csv", "testdata/mssql/test_uniqueidentifier_column_table.csv")
 }
 
-func TestMultipleTableOutput(t *testing.T) {
+func TestMssqlMultipleTableOutput(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_multiple_table_output1;
 		CREATE TABLE dummy_schema.test_multiple_table_output1 (
@@ -664,7 +664,7 @@ func TestMultipleTableOutput(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		INSERT INTO dummy_schema.test_multiple_table_output1 (col1) VALUES (1);
 		INSERT INTO dummy_schema.test_multiple_table_output1 (col1) VALUES (10);
@@ -682,8 +682,8 @@ func TestMultipleTableOutput(t *testing.T) {
 		INSERT INTO dummy_schema.test_multiple_table_output5 (col5) VALUES (50);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output1.csv", "testdata/mssql/test_multiple_table_output1.csv")
@@ -693,9 +693,9 @@ func TestMultipleTableOutput(t *testing.T) {
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_table_output5.csv", "testdata/mssql/test_multiple_table_output5.csv")
 }
 
-func TestMultipleColumnOutput(t *testing.T) {
+func TestMssqlMultipleColumnOutput(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_multiple_column_output;
 		CREATE TABLE dummy_schema.test_multiple_column_output (
@@ -706,7 +706,7 @@ func TestMultipleColumnOutput(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 
 		INSERT INTO dummy_schema.test_multiple_column_output (col1, col2, col3, col4)
@@ -722,16 +722,16 @@ func TestMultipleColumnOutput(t *testing.T) {
 		VALUES (4, 'TEST,STRING', 3.3, 1);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_multiple_column_output.csv", "testdata/mssql/test_multiple_column_output.csv")
 }
 
-func TestUnsupportedColumnOutput(t *testing.T) {
+func TestMssqlUnsupportedColumnOutput(t *testing.T) {
 	// Create table for test
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 		DROP TABLE IF EXISTS dummy_schema.test_unsupported_column_output;
 		CREATE TABLE dummy_schema.test_unsupported_column_output (
@@ -742,7 +742,7 @@ func TestUnsupportedColumnOutput(t *testing.T) {
 		);
 	`)
 	// Insert test data
-	execSQL(`
+	execMssqlTestSQL(`
 		USE dummy_database;
 
 		INSERT INTO dummy_schema.test_unsupported_column_output (col1, unsupported_col, col2, col3)
@@ -758,8 +758,8 @@ func TestUnsupportedColumnOutput(t *testing.T) {
 		VALUES (4, CAST(1 AS INT), 'TEST,STRING', 3.3);
 	`)
 
-	msSqlOption.OutDir = "testoutdir/mssql"
-	commandOption = msSqlOption
+	msSqlTestOption.OutDir = "testoutdir/mssql"
+	commandOption = msSqlTestOption
 	exec()
 
 	AssertCompareFiles(t, "testoutdir/mssql/test_unsupported_column_output.csv", "testdata/mssql/test_unsupported_column_output.csv")
