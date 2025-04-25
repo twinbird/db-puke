@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -29,6 +30,7 @@ var (
 type Option struct {
 	DBType           string
 	Host             string
+	PortString       string
 	Port             int
 	Database         string
 	Schema           string
@@ -45,7 +47,7 @@ func parseArgs() *Option {
 
 	flag.StringVar(&option.DBType, "type", "", "database server type [mssql]")
 	flag.StringVar(&option.Host, "h", "localhost", "database server host")
-	flag.IntVar(&option.Port, "p", 1433, "database server port")
+	flag.StringVar(&option.PortString, "p", "", "database server port")
 	flag.StringVar(&option.Database, "d", "", "database")
 	flag.StringVar(&option.Schema, "s", "", "database schema")
 	flag.StringVar(&option.User, "u", "", "database user name")
@@ -81,16 +83,20 @@ Options:
 		option.Password = pass
 	}
 
-	if option.DBType == "" {
-		fmt.Println("Error: Please specify the database type (-type)")
+	switch option.DBType {
+	case DBTypeMSSql:
+		parseMssqlOption(option)
+	default:
+		fmt.Printf("Error: Specify database type(%s) is not supported\n", option.DBType)
 		os.Exit(1)
 	}
 
-	if option.DBType != DBTypeMSSql {
-		fmt.Println("Error: Specify database type is not supported")
-		os.Exit(1)
-	}
+	option.ParsedTableNames = parseTableOption(option.TableNames)
 
+	return option
+}
+
+func parseMssqlOption(option *Option) {
 	if option.Database == "" {
 		fmt.Println("Error: Please specify the database name (-d)")
 		os.Exit(1)
@@ -107,10 +113,16 @@ Options:
 		fmt.Println("Error: Please specify the database password (-P)")
 		os.Exit(1)
 	}
-
-	option.ParsedTableNames = parseTableOption(option.TableNames)
-
-	return option
+	if option.PortString == "" {
+		option.Port = 1433
+	} else {
+		port, err := strconv.Atoi(option.PortString)
+		if err != nil {
+			fmt.Println("Error: Invalid port number (-p)")
+			os.Exit(1)
+		}
+		option.Port = port
+	}
 }
 
 func parseTableOption(opstr string) []string {
