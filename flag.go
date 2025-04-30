@@ -27,6 +27,21 @@ type Option struct {
 	ParsedTableNames []string
 }
 
+func usageMessage(prg_name string) error {
+	return fmt.Errorf(`%s - database data exporter [version %s]
+
+Usage:
+  %s -type <database type> -h <hostname> -d <database name> -s <database schema> -u <username> -P <password>
+
+Example:
+  mssql:
+    DB_PUKE_PASSWORD=saPassword1234 %s -type mssql -h localhost -d dummy_database -s dummy_schema -u sa
+
+See more:
+  '%s <database type> --help'
+`, prg_name, DBPukeVersion, prg_name, prg_name, prg_name)
+}
+
 func parseArgs() (*Option, error) {
 	option := &Option{}
 
@@ -41,25 +56,8 @@ func parseArgs() (*Option, error) {
 	flag.StringVar(&option.User, "u", "", "database user name")
 	flag.StringVar(&option.Password, "P", "", "database user password(or use DB_PUKE_PASSWORD env var)")
 
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, `%s - database data exporter [version %s]
-
-Usage:
-  db-puke -type <database type> -h <hostname> -p <access port> -d <database name> -s <database schema> -u <username> -P <password> -o <output dir>
-
-Example:
-  mssql:
-    DB_PUKE_PASSWORD=saPassword1234 ./db-puke -type mssql -h localhost -p 1433 -d dummy_database -s dummy_schema -u sa -o outdir
-
-Options:
-`, os.Args[0], DBPukeVersion)
-		flag.PrintDefaults()
-		fmt.Fprintln(os.Stderr, "  --help\n\tshow this help message and exit")
-	}
-
 	if len(os.Args) == 1 {
-		flag.Usage()
-		os.Exit(0)
+		return nil, usageMessage(os.Args[0])
 	}
 
 	flag.Parse()
