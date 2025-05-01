@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -27,44 +26,49 @@ type Option struct {
 	ParsedTableNames []string
 }
 
-func usageMessage(prg_name string) error {
-	return fmt.Errorf(`%s - database data exporter [version %s]
+func rootUsageMessage() error {
+	return fmt.Errorf(`db-puke - database data exporter [version %s]
 
 Usage:
-  %s -type <database type> -h <hostname> -d <database name> -s <database schema> -u <username> -P <password>
+  db-puke <database type> -h <hostname> -d <database name> -s <database schema> -u <username> -P <password>
 
 Example:
-  mssql:
-    DB_PUKE_PASSWORD=saPassword1234 %s -type mssql -h localhost -d dummy_database -s dummy_schema -u sa
+  mssql(SQLServer):
+    DB_PUKE_PASSWORD=saPassword1234 db-puke mssql -h localhost -d dummy_database -s dummy_schema -u sa
 
 See more:
-  '%s <database type> --help'
-`, prg_name, DBPukeVersion, prg_name, prg_name, prg_name)
+  'db-puke <database type> --help'
+`, DBPukeVersion)
 }
 
 func parseArgs() (*Option, error) {
 	option := &Option{}
 
-	flag.StringVar(&option.DBType, "type", "", "database server type [mssql]")
-	flag.StringVar(&option.OutDir, "o", "db-puke-exported", "export directory")
-	flag.StringVar(&option.NullRepresent, "N", "NULL", "string to represent NULL")
-	flag.StringVar(&option.TableNames, "t", "", "table names to export (comma-separated). exports all tables if omitted.")
-	flag.StringVar(&option.Host, "h", "localhost", "database server host")
-	flag.StringVar(&option.PortString, "p", "", "database server port")
-	flag.StringVar(&option.Database, "d", "", "database")
-	flag.StringVar(&option.Schema, "s", "", "database schema")
-	flag.StringVar(&option.User, "u", "", "database user name")
-	flag.StringVar(&option.Password, "P", "", "database user password(or use DB_PUKE_PASSWORD env var)")
-
-	if len(os.Args) == 1 {
-		return nil, usageMessage(os.Args[0])
+	if len(os.Args) < 3 {
+		return option, rootUsageMessage()
 	}
 
-	flag.Parse()
+	option.DBType = os.Args[1]
 
-	if pass, ok := os.LookupEnv(DBPukeEnvironmentNamePassword); ok {
-		option.Password = pass
+	fs := flag.NewFlagSet(option.DBType, flag.ContinueOnError)
+	setCommonFlag(option, fs)
+
+	switch option.DBType {
+	case DBTypeMSSql:
+		flag.ErrHelp = mssqlUsageMessage(os.Args[0])
+		setMssqlFlag(option, fs)
+	default:
+		return nil, fmt.Errorf("error: specify database type(%s) is not supported\n", option.DBType)
 	}
+
+	if err := fs.Parse(os.Args[2:]); err != nil {
+		if err == flag.ErrHelp {
+			return nil, fmt.Errorf("")
+		}
+		return nil, err
+	}
+
+	setFromEnv(option)
 
 	switch option.DBType {
 	case DBTypeMSSql:
@@ -80,30 +84,16 @@ func parseArgs() (*Option, error) {
 	return option, nil
 }
 
-func validateMssqlOption(option *Option) error {
-	if option.Database == "" {
-		return fmt.Errorf("error: please specify the database name (-d)\n")
-	}
-	if option.Schema == "" {
-		return fmt.Errorf("error: please specify the schema name (-s)\n")
-	}
-	if option.User == "" {
-		return fmt.Errorf("error: please specify the username (-u)\n")
-	}
-	if option.Password == "" {
-		return fmt.Errorf("error: please specify the database password (-P)\n")
-	}
-	if option.PortString == "" {
-		option.Port = 1433
-	} else {
-		port, err := strconv.Atoi(option.PortString)
-		if err != nil {
-			fmt.Errorf("error: invalid port number (-p)\n")
-		}
-		option.Port = port
-	}
+func setCommonFlag(option *Option, fs *flag.FlagSet) {
+	fs.StringVar(&option.OutDir, "o", "db-puke-exported", "export directory")
+	fs.StringVar(&option.NullRepresent, "N", "NULL", "string to represent NULL")
+	fs.StringVar(&option.TableNames, "t", "", "table names to export (comma-separated). exports all tables if omitted.")
+}
 
-	return nil
+func setFromEnv(option *Option) {
+	if pass, ok := os.LookupEnv(DBPukeEnvironmentNamePassword); ok {
+		option.Password = pass
+	}
 }
 
 func parseTableOption(opstr string) []string {
