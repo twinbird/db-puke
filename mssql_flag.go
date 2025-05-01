@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+const (
+	MssqlNoSpecifiedDatabaseMessage = "error: please specify the database name (-d)\n"
+)
+
 func mssqlUsageMessage(prg_name string) error {
 	return fmt.Errorf(`%s - database data exporter [version %s]
 
@@ -32,7 +36,7 @@ func setMssqlFlag(option *Option, fs *flag.FlagSet) {
 
 func validateMssqlOption(option *Option) error {
 	if option.Database == "" {
-		return fmt.Errorf("error: please specify the database name (-d)\n")
+		return fmt.Errorf(MssqlNoSpecifiedDatabaseMessage)
 	}
 	if option.Schema == "" {
 		return fmt.Errorf("error: please specify the schema name (-s)\n")

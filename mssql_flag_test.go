@@ -113,3 +113,47 @@ func TestPasswordFromEnv(t *testing.T) {
 		t.Errorf("option.Password want: %s, but got %s", "saPassword", option.Password)
 	}
 }
+
+func TestNoSpecifiedHost(t *testing.T) {
+	option, err := parseArgs([]string{
+		"db-puke",
+		"mssql",
+		"-d",
+		"dummy_database",
+		"-s",
+		"dummy_schema",
+		"-u",
+		"sa",
+		"-P",
+		"saPassword",
+	}, io.Discard)
+
+	if err != nil {
+		t.Fatalf("call by valid args. want: nil, but got '%s'", err.Error())
+	}
+
+	if option.Host != "localhost" {
+		t.Fatalf("want: localhost, but got %s", option.Host)
+	}
+}
+
+func TestNoSpecifiedDatabase(t *testing.T) {
+	_, err := parseArgs([]string{
+		"db-puke",
+		"mssql",
+		"-s",
+		"dummy_schema",
+		"-u",
+		"sa",
+		"-P",
+		"saPassword",
+	}, io.Discard)
+
+	if err == nil {
+		t.Fatalf("call by invalid args. want error: '%s', but got nil", MssqlNoSpecifiedDatabaseMessage)
+	}
+
+	if err.Error() != MssqlNoSpecifiedDatabaseMessage {
+		t.Fatalf("call by invalid args. want error: '%s', but got '%s'", MssqlNoSpecifiedDatabaseMessage, err.Error())
+	}
+}
