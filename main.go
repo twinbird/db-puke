@@ -24,7 +24,7 @@ type DBPukeOperator interface {
 }
 
 func main() {
-	option, err := parseArgs()
+	option, err := parseArgs(os.Args, os.Stderr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(1)

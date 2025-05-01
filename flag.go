@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -41,27 +42,28 @@ See more:
 `, DBPukeVersion)
 }
 
-func parseArgs() (*Option, error) {
+func parseArgs(args []string, errWriter io.Writer) (*Option, error) {
 	option := &Option{}
 
-	if len(os.Args) < 3 {
+	if len(args) < 3 {
 		return option, rootUsageMessage()
 	}
 
-	option.DBType = os.Args[1]
+	option.DBType = args[1]
 
 	fs := flag.NewFlagSet(option.DBType, flag.ContinueOnError)
+	fs.SetOutput(errWriter)
 	setCommonFlag(option, fs)
 
 	switch option.DBType {
 	case DBTypeMSSql:
-		flag.ErrHelp = mssqlUsageMessage(os.Args[0])
+		flag.ErrHelp = mssqlUsageMessage(args[0])
 		setMssqlFlag(option, fs)
 	default:
 		return nil, fmt.Errorf("error: specify database type(%s) is not supported\n", option.DBType)
 	}
 
-	if err := fs.Parse(os.Args[2:]); err != nil {
+	if err := fs.Parse(args[2:]); err != nil {
 		if err == flag.ErrHelp {
 			return nil, fmt.Errorf("")
 		}
