@@ -157,3 +157,45 @@ func TestNoSpecifiedDatabase(t *testing.T) {
 		t.Fatalf("call by invalid args. want error: '%s', but got '%s'", MssqlNoSpecifiedDatabaseMessage, err.Error())
 	}
 }
+
+func TestNoSpecifiedSchema(t *testing.T) {
+	_, err := parseArgs([]string{
+		"db-puke",
+		"mssql",
+		"-d",
+		"dummy_database",
+		"-u",
+		"sa",
+		"-P",
+		"saPassword",
+	}, io.Discard)
+
+	if err == nil {
+		t.Fatalf("call by invalid args. want error: '%s', but got nil", MssqlNoSpecifiedSchemaMessage)
+	}
+
+	if err.Error() != MssqlNoSpecifiedSchemaMessage {
+		t.Fatalf("call by invalid args. want error: '%s', but got '%s'", MssqlNoSpecifiedSchemaMessage, err.Error())
+	}
+}
+
+func TestNoSpecifiedUser(t *testing.T) {
+	_, err := parseArgs([]string{
+		"db-puke",
+		"mssql",
+		"-d",
+		"dummy_database",
+		"-s",
+		"dummy_schema",
+		"-P",
+		"saPassword",
+	}, io.Discard)
+
+	if err == nil {
+		t.Fatalf("call by invalid args. want error: '%s', but got nil", MssqlNoSpecifiedUserMessage)
+	}
+
+	if err.Error() != MssqlNoSpecifiedUserMessage {
+		t.Fatalf("call by invalid args. want error: '%s', but got '%s'", MssqlNoSpecifiedUserMessage, err.Error())
+	}
+}

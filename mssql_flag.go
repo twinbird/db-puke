@@ -8,6 +8,8 @@ import (
 
 const (
 	MssqlNoSpecifiedDatabaseMessage = "error: please specify the database name (-d)\n"
+	MssqlNoSpecifiedSchemaMessage   = "error: please specify the schema name (-s)\n"
+	MssqlNoSpecifiedUserMessage     = "error: please specify the username (-u)\n"
 )
 
 func mssqlUsageMessage(prg_name string) error {
@@ -39,10 +41,10 @@ func validateMssqlOption(option *Option) error {
 		return fmt.Errorf(MssqlNoSpecifiedDatabaseMessage)
 	}
 	if option.Schema == "" {
-		return fmt.Errorf("error: please specify the schema name (-s)\n")
+		return fmt.Errorf(MssqlNoSpecifiedSchemaMessage)
 	}
 	if option.User == "" {
-		return fmt.Errorf("error: please specify the username (-u)\n")
+		return fmt.Errorf(MssqlNoSpecifiedUserMessage)
 	}
 	if option.Password == "" {
 		return fmt.Errorf("error: please specify the database password (-P)\n")
