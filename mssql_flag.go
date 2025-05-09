@@ -7,11 +7,12 @@ import (
 )
 
 const (
-	MssqlNoSpecifiedDatabaseMessage = "error: please specify the database name (-d)\n"
-	MssqlNoSpecifiedSchemaMessage   = "error: please specify the schema name (-s)\n"
-	MssqlNoSpecifiedUserMessage     = "error: please specify the username (-u)\n"
-	MssqlNoSpecifiedPasswordMessage = "error: please specify the database password (-P)\n"
-	MssqlDefaultPort                = 1433
+	MssqlNoSpecifiedDatabaseMessage  = "error: please specify the database name (-d)\n"
+	MssqlNoSpecifiedSchemaMessage    = "error: please specify the schema name (-s)\n"
+	MssqlNoSpecifiedUserMessage      = "error: please specify the username (-u)\n"
+	MssqlNoSpecifiedPasswordMessage  = "error: please specify the database password (-P)\n"
+	MssqlInvalidPortSpecifiedMessage = "error: invalid port number (-p)\n"
+	MssqlDefaultPort                 = 1433
 )
 
 func mssqlUsageMessage(prg_name string) error {
@@ -56,7 +57,7 @@ func validateMssqlOption(option *Option) error {
 	} else {
 		port, err := strconv.Atoi(option.PortString)
 		if err != nil {
-			return fmt.Errorf("error: invalid port number (-p)\n")
+			return fmt.Errorf(MssqlInvalidPortSpecifiedMessage)
 		}
 		option.Port = port
 	}

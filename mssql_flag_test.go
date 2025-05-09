@@ -221,6 +221,31 @@ func TestNoSpecifiedPassword(t *testing.T) {
 	}
 }
 
+func TestMssqlInvalidPortSpecified(t *testing.T) {
+	_, err := parseArgs([]string{
+		"db-puke",
+		"mssql",
+		"-d",
+		"dummy_database",
+		"-s",
+		"dummy_schema",
+		"-u",
+		"sa",
+		"-P",
+		"saPassword1234",
+		"-p",
+		"foo",
+	}, io.Discard)
+
+	if err == nil {
+		t.Fatalf("call by invalid args. want error: '%s', but got nil", MssqlInvalidPortSpecifiedMessage)
+	}
+
+	if err.Error() != MssqlInvalidPortSpecifiedMessage {
+		t.Fatalf("call by invalid args. want error: '%s', but got '%s'", MssqlInvalidPortSpecifiedMessage, err.Error())
+	}
+}
+
 func TestMssqlDefaultPort(t *testing.T) {
 	option, err := parseArgs([]string{
 		"db-puke",
