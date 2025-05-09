@@ -10,6 +10,7 @@ const (
 	MssqlNoSpecifiedDatabaseMessage = "error: please specify the database name (-d)\n"
 	MssqlNoSpecifiedSchemaMessage   = "error: please specify the schema name (-s)\n"
 	MssqlNoSpecifiedUserMessage     = "error: please specify the username (-u)\n"
+	MssqlNoSpecifiedPasswordMessage = "error: please specify the database password (-P)\n"
 )
 
 func mssqlUsageMessage(prg_name string) error {
@@ -47,7 +48,7 @@ func validateMssqlOption(option *Option) error {
 		return fmt.Errorf(MssqlNoSpecifiedUserMessage)
 	}
 	if option.Password == "" {
-		return fmt.Errorf("error: please specify the database password (-P)\n")
+		return fmt.Errorf(MssqlNoSpecifiedPasswordMessage)
 	}
 	if option.PortString == "" {
 		option.Port = 1433

@@ -199,3 +199,24 @@ func TestNoSpecifiedUser(t *testing.T) {
 		t.Fatalf("call by invalid args. want error: '%s', but got '%s'", MssqlNoSpecifiedUserMessage, err.Error())
 	}
 }
+
+func TestNoSpecifiedPassword(t *testing.T) {
+	_, err := parseArgs([]string{
+		"db-puke",
+		"mssql",
+		"-d",
+		"dummy_database",
+		"-s",
+		"dummy_schema",
+		"-u",
+		"sa",
+	}, io.Discard)
+
+	if err == nil {
+		t.Fatalf("call by invalid args. want error: '%s', but got nil", MssqlNoSpecifiedPasswordMessage)
+	}
+
+	if err.Error() != MssqlNoSpecifiedPasswordMessage {
+		t.Fatalf("call by invalid args. want error: '%s', but got '%s'", MssqlNoSpecifiedPasswordMessage, err.Error())
+	}
+}
