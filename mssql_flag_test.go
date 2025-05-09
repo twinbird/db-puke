@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestValidMinimumArgs(t *testing.T) {
+func TestMssqlValidMinimumArgs(t *testing.T) {
 	option, err := parseArgs([]string{
 		"db-puke",
 		"mssql",
@@ -49,7 +49,7 @@ func TestValidMinimumArgs(t *testing.T) {
 	}
 }
 
-func TestRootHelpArgs(t *testing.T) {
+func TestMssqlRootHelpArgs(t *testing.T) {
 	_, err := parseArgs([]string{
 		"db-puke",
 		"--help",
@@ -59,7 +59,7 @@ func TestRootHelpArgs(t *testing.T) {
 	}
 }
 
-func TestSubcommandHelpArgs(t *testing.T) {
+func TestMssqlSubcommandHelpArgs(t *testing.T) {
 	_, err := parseArgs([]string{
 		"db-puke",
 		"mssql",
@@ -70,7 +70,7 @@ func TestSubcommandHelpArgs(t *testing.T) {
 	}
 }
 
-func TestPasswordFromEnv(t *testing.T) {
+func TestMssqlPasswordFromEnv(t *testing.T) {
 	t.Setenv(DBPukeEnvironmentNamePassword, "saPassword")
 	option, err := parseArgs([]string{
 		"db-puke",
@@ -114,7 +114,7 @@ func TestPasswordFromEnv(t *testing.T) {
 	}
 }
 
-func TestNoSpecifiedHost(t *testing.T) {
+func TestMssqlNoSpecifiedHost(t *testing.T) {
 	option, err := parseArgs([]string{
 		"db-puke",
 		"mssql",
@@ -137,7 +137,7 @@ func TestNoSpecifiedHost(t *testing.T) {
 	}
 }
 
-func TestNoSpecifiedDatabase(t *testing.T) {
+func TestMssqlNoSpecifiedDatabase(t *testing.T) {
 	_, err := parseArgs([]string{
 		"db-puke",
 		"mssql",
@@ -158,7 +158,7 @@ func TestNoSpecifiedDatabase(t *testing.T) {
 	}
 }
 
-func TestNoSpecifiedSchema(t *testing.T) {
+func TestMssqlNoSpecifiedSchema(t *testing.T) {
 	_, err := parseArgs([]string{
 		"db-puke",
 		"mssql",
@@ -179,7 +179,7 @@ func TestNoSpecifiedSchema(t *testing.T) {
 	}
 }
 
-func TestNoSpecifiedUser(t *testing.T) {
+func TestMssqlNoSpecifiedUser(t *testing.T) {
 	_, err := parseArgs([]string{
 		"db-puke",
 		"mssql",
@@ -200,7 +200,7 @@ func TestNoSpecifiedUser(t *testing.T) {
 	}
 }
 
-func TestNoSpecifiedPassword(t *testing.T) {
+func TestMssqlNoSpecifiedPassword(t *testing.T) {
 	_, err := parseArgs([]string{
 		"db-puke",
 		"mssql",
